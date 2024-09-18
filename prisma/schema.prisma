@@ -70,8 +70,8 @@ model Server {
 model IpAddress {
   id          Int      @id @default(autoincrement())
   ip          String   @unique
-  nama_server String
-  status      Status
+  nama_server String?
+  status      Status   @default(AVAILABLE)
   type        IpType
   server      Server[]
 }

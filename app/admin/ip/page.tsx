@@ -6,6 +6,8 @@ import { Menu } from "@headlessui/react";
 import { ToastContainer } from "react-toastify";
 import Title from "@/app/components/Title";
 import { GoFilter, GoPlus } from "react-icons/go";
+import ImportIpModal from "@/app/components/admin/ip/ImportIpModal";
+import { RiFileExcel2Line } from "react-icons/ri";
 
 interface IpInternal {
   id: number;
@@ -17,6 +19,7 @@ interface IpInternal {
 
 const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalImport, setIsModalImport] = useState(false);
   const [currentIpInternal, setCurrentIpInternal] = useState<IpInternal | null>(
     null
   );
@@ -52,6 +55,10 @@ const Page = () => {
     setCurrentIpInternal(null);
   };
 
+  const handleReset = () => {
+    fetchIpInternals(1);
+  };
+
   const handleEdit = (ipInternal: IpInternal) => {
     setCurrentIpInternal(ipInternal);
     setIsModalOpen(true);
@@ -84,6 +91,10 @@ const Page = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentIpInternal(null);
+  };
+
+  const handleCloseModalImport = () => {
+    setIsModalImport(false);
   };
 
   useEffect(() => {
@@ -216,6 +227,14 @@ const Page = () => {
               <GoPlus className="md:hidden text-lg" />
               <span className="hidden md:inline ml-2">Add IP</span>
             </button>
+
+            <button
+              onClick={() => setIsModalImport(true)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center justify-center ml-4"
+            >
+              <RiFileExcel2Line className="md:hidden text-lg" />
+              <span className="hidden md:inline ml-2">Import IP</span>
+            </button>
           </div>
         </div>
 
@@ -286,6 +305,12 @@ const Page = () => {
         onClose={handleCloseModal}
         onSave={handleAddIpInternal}
         ipInternal={currentIpInternal}
+      />
+
+      <ImportIpModal
+        isOpen={isModalImport}
+        onClose={handleCloseModalImport}
+        onSave={handleReset}
       />
     </div>
   );

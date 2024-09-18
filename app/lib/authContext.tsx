@@ -41,7 +41,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         ) {
           return;
         }
-
         navigateToRole(decodedToken.role);
       } catch (error) {
         console.error("Invalid token:", error);

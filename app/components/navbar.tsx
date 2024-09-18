@@ -115,7 +115,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Desktop Navbar */}
       <header className="hidden md:flex items-center justify-between rounded-xl bg-white px-5 py-3 shadow-md">
         <div>
           <img src="/proxmox.png" alt="Logo" className="w-10 cursor-pointer" />

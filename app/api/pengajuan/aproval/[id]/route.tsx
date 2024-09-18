@@ -52,6 +52,24 @@ export async function PUT(
       vmid_old,
     } = await req.json();
 
+    const pengajuan = await prisma.pengajuan.findUnique({
+      where: {
+        id: Number(id),
+      },
+      include: {
+        template: true,
+        divisi: true,
+        user: true,
+      },
+    });
+
+    if (!pengajuan) {
+      return respondWithError(
+        "Pengajuan dengan id tersebut tidak ditemukan",
+        404
+      );
+    }
+
     const httpsAgent = new https.Agent({
       rejectUnauthorized: false,
     });
@@ -61,11 +79,11 @@ export async function PUT(
       "Content-Type": "application/json",
     };
 
-    if (jenis_pengajuan === "New") {
+    if (pengajuan.jenis_pengajuan === "New") {
       let ipAddress;
       let bridge: string;
 
-      if (segment === "internal") {
+      if (pengajuan.segment === "internal") {
         bridge = "vmbr0";
         ipAddress = await prisma.ipAddress.findFirst({
           where: {
@@ -73,7 +91,7 @@ export async function PUT(
             status: "AVAILABLE",
           },
         });
-      } else if (segment === "backend") {
+      } else if (pengajuan.segment === "backend") {
         bridge = "BE";
         ipAddress = await prisma.ipAddress.findFirst({
           where: {
@@ -81,7 +99,7 @@ export async function PUT(
             status: "AVAILABLE",
           },
         });
-      } else if (segment === "frontend") {
+      } else if (pengajuan.segment === "frontend") {
         bridge = "FE";
         ipAddress = await prisma.ipAddress.findFirst({
           where: {
@@ -93,20 +111,20 @@ export async function PUT(
 
       if (!ipAddress) {
         return respondWithError(
-          `No available IP address found for segment ${segment}`,
+          `No available IP address found for segment ${pengajuan.segment}`,
           404
         );
       }
 
       const template = await prisma.template.findUnique({
         where: {
-          id: Number(id_template),
+          id: Number(pengajuan.id_template),
         },
       });
 
       if (!template) {
         return respondWithError(
-          `No available template found for id ${id_template}`,
+          `No available template found for id ${pengajuan.id_template}`,
           404
         );
       }
@@ -181,19 +199,6 @@ export async function PUT(
 
           while (usedIds.includes(newid)) {
             newid++;
-          }
-
-          const pengajuan = await prisma.pengajuan.findUnique({
-            where: {
-              id: Number(id),
-            },
-            select: {
-              id_user: true,
-            },
-          });
-
-          if (!pengajuan) {
-            return respondWithError(`Pengajuan tidak ditemukan`, 200);
           }
 
           const server = await prisma.server.create({
@@ -312,22 +317,51 @@ export async function PUT(
         { status: 200 }
       );
     } else if (jenis_pengajuan === "Existing") {
+      const taskOngoig = await prisma.pengajuan.findFirst({
+        where: {
+          vmid_old: pengajuan.vmid_old,
+          status_pengajuan: "Proses pengerjaan",
+        },
+        orderBy: {
+          id: "desc",
+        },
+      });
+      if (taskOngoig) {
+        return respondWithError(
+          `VM with ID ${pengajuan.vmid_old} is currently being cloned or has another ongoing task.`,
+          400
+        );
+      }
+
+      const server = await prisma.server.findUnique({
+        where: {
+          vmid: Number(pengajuan.vmid_old),
+        },
+        select: {
+          id_template: true,
+        },
+      });
+
+      if (!server) {
+        return respondWithError(`Server clonig tidak ditemukan`, 404);
+      }
+
       let ipAddress;
-      if (segment === "internal") {
+      if (pengajuan.segment === "internal") {
         ipAddress = await prisma.ipAddress.findFirst({
           where: {
             type: "INTERNAL",
             status: "AVAILABLE",
           },
         });
-      } else if (segment === "backend") {
+      } else if (pengajuan.segment === "backend") {
         ipAddress = await prisma.ipAddress.findFirst({
           where: {
             type: "BACKEND",
             status: "AVAILABLE",
           },
         });
-      } else if (segment === "frontend") {
+      } else if (pengajuan.segment === "frontend") {
         ipAddress = await prisma.ipAddress.findFirst({
           where: {
             type: "FRONTEND",
@@ -338,22 +372,9 @@ export async function PUT(
 
       if (!ipAddress) {
         return respondWithError(
-          `No available IP address found for segment ${segment}`,
+          `No available IP address found for segment ${pengajuan.segment}`,
           400
         );
-      }
-
-      const server = await prisma.server.findUnique({
-        where: {
-          vmid: vmid_old,
-        },
-        select: {
-          id_template: true,
-        },
-      });
-
-      if (!server) {
-        return respondWithError(`Server clonig tidak ditemukan`, 404);
       }
 
       const response = await prisma.pengajuan.update({
@@ -421,19 +442,6 @@ export async function PUT(
 
           while (usedIds.includes(newid)) {
             newid++;
-          }
-
-          const pengajuan = await prisma.pengajuan.findUnique({
-            where: {
-              id: Number(id),
-            },
-            select: {
-              id_user: true,
-            },
-          });
-
-          if (!pengajuan) {
-            return respondWithError(`Pengajuan tidak ditemukan`, 200);
           }
 
           await prisma.ipAddress.update({

@@ -1,6 +1,8 @@
 import React from "react";
 import { useState } from "react";
-import { GrPowerShutdown } from "react-icons/gr";
+import { AiOutlineSync } from "react-icons/ai";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Member {
   name: string;
@@ -11,6 +13,11 @@ interface Member {
   maxcpu: number;
   vmid: number;
   image: string;
+  owner: string;
+  username: string;
+  ip: string;
+  type_os: string;
+  segment: string;
 }
 
 interface SyncIPModalProps {
@@ -20,30 +27,46 @@ interface SyncIPModalProps {
 }
 
 const SyncIPModal: React.FC<SyncIPModalProps> = ({ isOpen, onClose, data }) => {
-  const [tujuan, setTujuan] = useState("");
   const [statusPowerOff, setStatusPowerOff] = useState(false);
   if (!isOpen) return null;
 
   const handlePowerOff = async () => {
     try {
       setStatusPowerOff(true);
-      const response = await fetch(`/api/proxmox/vms/poweroff/${data?.vmid}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          node: data?.node,
-          tujuan,
-        }),
-      });
-      if (response.ok) {
-        setTujuan("");
-        setStatusPowerOff(false);
-      } else {
-        console.error("Failed to delete divisi:", response.statusText);
-        setTujuan("");
+      console.log(data);
+
+      let gateway;
+      if (data?.segment === "internal") {
+        gateway = "192.168.1.1";
+      } else if (data?.segment === "backend") {
+        gateway = "10.10.30.1";
+      } else if (data?.segment === "frontend") {
+        gateway = "10.10.40.1";
       }
+
+      const response = await fetch(
+        `/api/proxmox/sync/${data?.type_os.toLowerCase()}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            vmid: data?.vmid,
+            node: data?.node,
+            ipAddress: data?.ip,
+            subnetMask: "255.255.255.0",
+            gateway,
+          }),
+        }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message || "successfully synchronized ip");
+      } else {
+        toast.error(result.error || "Error synchronized");
+      }
+      setStatusPowerOff(false);
     } catch (error) {
       console.error("Error during deletion:", error);
     }
@@ -65,7 +88,7 @@ const SyncIPModal: React.FC<SyncIPModalProps> = ({ isOpen, onClose, data }) => {
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 relative">
             <div className="flex justify-between items-center">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Confirm PowerOff
+                Confirm Sync Ip Address
               </h3>
               <button
                 onClick={onClose}
@@ -89,22 +112,8 @@ const SyncIPModal: React.FC<SyncIPModalProps> = ({ isOpen, onClose, data }) => {
             </div>
             <div className="mt-2 px-1">
               <p className="text-sm my-2">
-                Apakah anda yakin ingin matikan vm {data?.vmid} tulis alasannya
-                :
+                Before performing IP synchronization, make sure the VM is on.
               </p>
-
-              <div className="mb-4">
-                <textarea
-                  id="tujuan_pengajuan"
-                  name="tujuan_pengajuan"
-                  value={tujuan}
-                  onChange={(e) => setTujuan(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Tujuan mematikan server(opsional)"
-                  required
-                  rows={4} // Adjust the number of rows to control the height of the textarea
-                />
-              </div>
 
               <div className="mt-4 flex justify-end">
                 <button
@@ -115,7 +124,7 @@ const SyncIPModal: React.FC<SyncIPModalProps> = ({ isOpen, onClose, data }) => {
                 </button>
                 <button
                   onClick={handlePowerOff}
-                  className="bg-red-500 flex justify-center items-center hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className="bg-violet-400 flex justify-center items-center hover:bg-violet-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
                   {statusPowerOff === true ? (
                     <svg
@@ -139,7 +148,7 @@ const SyncIPModal: React.FC<SyncIPModalProps> = ({ isOpen, onClose, data }) => {
                       ></path>
                     </svg>
                   ) : (
-                    <GrPowerShutdown className="text-2xl text-white" />
+                    <AiOutlineSync className="text-2xl text-white" />
                   )}
                 </button>
               </div>

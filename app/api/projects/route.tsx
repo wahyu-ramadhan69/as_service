@@ -113,6 +113,7 @@ export async function GET(req: Request) {
         username: matchedServer ? matchedServer.user.username : "Unknown",
         ip: matchedServer ? matchedServer.ip_address.ip : "Unknown",
         id_ip: matchedServer ? matchedServer.id_ip : "Unknown",
+        segment: matchedServer ? matchedServer.segment : "Ip Not Found",
       };
     });
 

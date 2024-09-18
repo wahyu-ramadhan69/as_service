@@ -36,6 +36,7 @@ interface Member {
   username: string;
   ip: string;
   type_os: string;
+  segment: string;
 }
 
 const ProjectUI = () => {
@@ -437,7 +438,7 @@ const ProjectUI = () => {
                           className="bg-violet-400 text-white w-1/2 m-1 flex justify-center items-center rounded"
                           onClick={() => handleSync(item)}
                         >
-                          <AiOutlineSync className=" text-2xl text-white mr-1" />{" "}
+                          <AiOutlineSync className=" text-2xl text-white mr-1" />
                           IP Address
                         </button>
                       </div>

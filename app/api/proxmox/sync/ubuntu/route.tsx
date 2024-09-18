@@ -4,46 +4,35 @@ import https from "https";
 import { respondWithSuccess } from "@/app/lib/Response";
 
 export async function POST(request: Request) {
-  const { static_ip, gateway_ip, node, vmid } = await request.json();
+  const { ipAddress, subnetMask, gateway, node, vmid } = await request.json();
 
+  // Menggunakan `netplan` untuk konfigurasi IP di Ubuntu
   const command = [
-    "sh",
+    "bash",
     "-c",
     `
-      # Determine the correct YAML file for netplan configuration
-      if [ -f /etc/netplan/00-installer-config.yaml ]; then
-        netplan_file="/etc/netplan/00-installer-config.yaml"
-      elif [ -f /etc/netplan/50-cloud-init.yaml ]; then
-        netplan_file="/etc/netplan/50-cloud-init.yaml"
-      else
-        echo "No suitable netplan configuration file found."
-        exit 1
-      fi
+      # Pastikan interface yang digunakan
+      interface=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n1);
 
-      # Configure network settings using netplan
-      sudo tee $netplan_file > /dev/null <<EOL
-      network:
-        version: 2
-        renderer: networkd
-        ethernets:
-          ens160:
-            dhcp4: no
-            addresses:
-              - ${static_ip}/24
-            routes:
-              - to: default
-                via: ${gateway_ip}
-            nameservers:
-              addresses:
-                - 192.168.29.12
-                - 192.168.29.101
-      EOL
+      # Mengatur IP statis dan hardcode DNS server pada file konfigurasi netplan /etc/netplan/50-cloud-init.yaml
+      sudo bash -c "cat << EOF > /etc/netplan/50-cloud-init.yaml
+network:
+  version: 2
+  ethernets:
+    \$interface:
+      dhcp4: no
+      addresses:
+        - ${ipAddress}/24
+      nameservers:
+        addresses: [192.168.29.12, 192.168.29.101]
+      routes:
+        - to: 0.0.0.0/0
+          via: ${gateway}
+EOF"
 
-      sudo chmod 600 $netplan_file
+      sudo netplan apply;
 
-      # Apply network configuration
-      sudo netplan apply > /dev/null
-      echo "Network settings updated successfully."
+      echo "IP address dan DNS telah diatur pada \$interface.";
     `,
   ];
 
@@ -82,7 +71,7 @@ export async function POST(request: Request) {
     const output = resultResponse.data.data["out-data"];
 
     return respondWithSuccess(
-      "Berhasil melakukan sinkronisasi IP Address",
+      "Berhasil melakukan sinkronisasi IP Address di Ubuntu",
       output,
       200
     );

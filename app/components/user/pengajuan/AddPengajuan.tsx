@@ -84,7 +84,6 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
       }
 
       const dataProxmox = await proxmoxResponse.json();
-      console.log(dataProxmox.data);
 
       const dataServer = await serverResponse.json();
 

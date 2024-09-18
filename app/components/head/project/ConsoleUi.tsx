@@ -63,11 +63,6 @@ const ConsoleModal: React.FC<ConsoleModalProps> = ({
       const response = await res.json();
       setPort(response.port);
       setPassword(response.password);
-      console.log(
-        `http://192.168.1.237:${port}/vnc.html?password=${encodeURIComponent(
-          response.password
-        )}&autoconnect=true&resize=scale`
-      );
     } catch (err) {
       console.error("Error:", err);
     }
@@ -116,7 +111,7 @@ const ConsoleModal: React.FC<ConsoleModalProps> = ({
                 <div className="w-full max-w-7xl mt-4">
                   <iframe
                     id="console-iframe"
-                    src={`http://192.168.1.237:${port}/vnc.html?password=${encodeURIComponent(
+                    src={`http://192.168.1.132:${port}/vnc.html?password=${encodeURIComponent(
                       password
                     )}&autoconnect=true&resize=scale`}
                     width="100%"
