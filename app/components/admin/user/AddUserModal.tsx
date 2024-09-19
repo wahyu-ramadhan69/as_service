@@ -258,7 +258,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
                     {divisi.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.id} {d.nama}
+                        {d.nama}
                       </option>
                     ))}
                   </select>
