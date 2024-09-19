@@ -308,6 +308,8 @@ const ProjectUI = () => {
                             ? "/windows.png"
                             : item.type_os === "Centos"
                             ? "/centos.png"
+                            : item.type_os === "OracleLinux"
+                            ? "/oracle.png"
                             : "/proxmox.png"
                         }
                         alt={item.name}
