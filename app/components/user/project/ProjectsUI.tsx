@@ -10,9 +10,9 @@ import {
 } from "react-icons/vsc";
 import { Menu } from "@headlessui/react";
 import { GrPowerShutdown } from "react-icons/gr";
-import { TbHandClick, TbLocationCode, TbLocationPin } from "react-icons/tb";
+import { TbLocationPin } from "react-icons/tb";
 import PowerOffModal from "./PowerOffModal";
-import { FaServer, FaUserAstronaut } from "react-icons/fa6";
+import { FaUserAstronaut } from "react-icons/fa6";
 import { LiaLaptopCodeSolid } from "react-icons/lia";
 import PowerOnModal from "./PowerOnModal";
 import { AiOutlineSync } from "react-icons/ai";
@@ -89,7 +89,7 @@ const ProjectUI = () => {
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 

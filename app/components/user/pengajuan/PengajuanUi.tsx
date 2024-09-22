@@ -122,7 +122,7 @@ export default function PengajuanUi() {
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        item.nama_aplikasi.toLowerCase().includes(searchTerm.toLowerCase())
+        item.nama_aplikasi?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 

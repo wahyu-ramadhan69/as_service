@@ -33,7 +33,6 @@ const SyncIPModal: React.FC<SyncIPModalProps> = ({ isOpen, onClose, data }) => {
   const handlePowerOff = async () => {
     try {
       setStatusPowerOff(true);
-      console.log(data);
 
       let gateway;
       if (data?.segment === "internal") {

@@ -110,7 +110,7 @@ export default function BucketPengajuanUi() {
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        item.nama_aplikasi.toLowerCase().includes(searchTerm.toLowerCase())
+        item.nama_aplikasi?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
