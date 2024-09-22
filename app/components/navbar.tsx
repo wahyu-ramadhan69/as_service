@@ -98,6 +98,7 @@ const Navbar = () => {
         <Link
           key={link.href}
           href={link.href}
+          prefetch={true}
           className={`translate-all rounded-full px-5 py-3 font-semibold duration-700 ease-in-out ${
             isActive
               ? "bg-slate-700 text-white"
