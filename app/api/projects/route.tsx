@@ -54,16 +54,7 @@ export async function GET(req: Request) {
       return respondWithError("Invalid or expired token", 401);
     }
 
-    const { userId } = decodedToken;
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        divisi: true,
-      },
-    });
+    const { username, role, divisi } = decodedToken;
 
     const isConnected = await testProxmoxConnection();
     if (!isConnected) {
@@ -71,7 +62,7 @@ export async function GET(req: Request) {
     }
 
     const response = await axios.get(
-      `${process.env.PROXMOX_API_URL}/pools/${user?.divisi.nama}`,
+      `${process.env.PROXMOX_API_URL}/pools/${divisi}`,
       {
         headers,
         httpsAgent,
@@ -80,11 +71,6 @@ export async function GET(req: Request) {
 
     const server = await prisma.server.findMany({
       include: {
-        user: {
-          select: {
-            username: true,
-          },
-        },
         ip_address: {
           select: {
             ip: true,
@@ -109,8 +95,7 @@ export async function GET(req: Request) {
         maxdisk: vm.maxdisk,
         node: vm.node,
         type_os: matchedServer ? matchedServer.template.type_os : "Unknown",
-        id_user: matchedServer ? matchedServer.id_user : null,
-        username: matchedServer ? matchedServer.user.username : "Unknown",
+        username: matchedServer ? matchedServer.user : "Unknown",
         ip: matchedServer ? matchedServer.ip_address.ip : "Unknown",
         id_ip: matchedServer ? matchedServer.id_ip : "Unknown",
         segment: matchedServer ? matchedServer.segment : "Ip Not Found",

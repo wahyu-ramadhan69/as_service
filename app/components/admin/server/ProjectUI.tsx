@@ -65,7 +65,7 @@ const ProjectUI = () => {
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/projects");
+      const response = await fetch("/api/projects/all");
       if (!response.ok) {
         const errorData = await response.json();
         toast.error(errorData.error);
@@ -441,6 +441,7 @@ const ProjectUI = () => {
                           onClick={() => handleSync(item)}
                         >
                           <AiOutlineSync className=" text-2xl text-white mr-1" />
+                          IP Address
                         </button>
                       </div>
                     </div>

@@ -27,7 +27,7 @@ interface LogEvent {
 }
 
 interface ApiResponse {
-  divisi: {
+  quota: {
     cpu: number;
     id: number;
     nama: string;
@@ -72,21 +72,21 @@ const DashboardMenu: React.FC = () => {
             id: 1,
             label: "CPU's",
             used: data.totalMaxCpu,
-            total: data.divisi.cpu,
+            total: data.quota.cpu,
             color: "bg-green-100",
           },
           {
             id: 2,
             label: "RAM",
             used: data.totalMaxMemGB,
-            total: data.divisi.ram,
+            total: data.quota.ram,
             color: "bg-blue-100",
           },
           {
             id: 3,
             label: "Storage",
             used: data.totalMaxDiskGB,
-            total: data.divisi.storage,
+            total: data.quota.storage,
             color: "bg-orange-100",
           },
         ];

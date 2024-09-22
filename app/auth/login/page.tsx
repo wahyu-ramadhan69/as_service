@@ -8,13 +8,14 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [authWith, setAuthWith] = useState("BCAFWIFI");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    login(username, password);
+    login(username, password, authWith);
     setLoading(false);
   };
 
@@ -42,6 +43,21 @@ export default function Login() {
           <div className="mt-12">
             <form onSubmit={handleSubmit}>
               <div>
+                <div className="text-sm font-bold text-gray-700 tracking-wide">
+                  Authentication Method
+                </div>
+                <select
+                  className="w-full text-sm py-2 border-b border-gray-300  text-gray-700 focus:outline-none focus:border-indigo-500"
+                  value={authWith}
+                  onChange={(e) => setAuthWith(e.target.value)}
+                  required
+                >
+                  <option value="BCAFWIFI">BCAFWIFI</option>
+                  <option value="LOCAL">LOCAL</option>
+                </select>
+              </div>
+
+              <div className="mt-8">
                 <div className="text-sm font-bold text-gray-700 tracking-wide">
                   Username
                 </div>

@@ -29,39 +29,15 @@ export async function GET(req: NextRequest) {
     return respondWithError("Invalid or expired token", 401);
   }
 
-  const { userId, role } = decodedToken;
+  const { username, role, divisi } = decodedToken;
 
   try {
     let logs: LogVM[];
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!user) {
-      return respondWithError("User not found", 404);
-    }
-
     if (role === "HEAD") {
       logs = await prisma.logVM.findMany({
         where: {
-          user: {
-            id_divisi: user.id_divisi,
-          },
-        },
-        include: {
-          user: {
-            select: {
-              username: true, // Selecting the username
-              divisi: {
-                select: {
-                  nama: true, // Selecting the division name
-                },
-              },
-            },
-          },
+          divisi,
         },
         orderBy: {
           tanggal_activity: "desc",
@@ -78,7 +54,7 @@ export async function GET(req: NextRequest) {
     } else if (role === "USER") {
       logs = await prisma.logVM.findMany({
         where: {
-          id_user: userId,
+          user: username,
         },
         orderBy: {
           tanggal_activity: "desc",

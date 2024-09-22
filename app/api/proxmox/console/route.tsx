@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     return respondWithError("Invalid or expired token", 401);
   }
 
-  const { userId } = decodedToken;
+  const { username, role, divisi } = decodedToken;
 
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
@@ -51,10 +51,11 @@ export async function POST(req: NextRequest) {
 
     await prisma.logVM.create({
       data: {
-        id_user: userId,
+        user: username,
         activity: "Console",
         vmid: Number(vmid),
         tujuan: "",
+        divisi: divisi,
       },
     });
 

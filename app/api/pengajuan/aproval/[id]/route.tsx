@@ -30,7 +30,7 @@ export async function PUT(
       return respondWithError("Invalid or expired token", 401);
     }
 
-    const { userId, role } = decodedToken;
+    const { username, role, divisi } = decodedToken;
 
     if (role !== "HEAD") {
       return respondWithError(
@@ -58,8 +58,6 @@ export async function PUT(
       },
       include: {
         template: true,
-        divisi: true,
-        user: true,
       },
     });
 
@@ -205,18 +203,10 @@ export async function PUT(
             data: {
               vmid: newid,
               id_template: Number(id_template),
-              id_user: pengajuan.id_user,
               id_ip: ipAddress.id,
               segment: segment,
-            },
-          });
-
-          const user = await prisma.user.findUnique({
-            where: {
-              id: userId,
-            },
-            include: {
-              divisi: true,
+              user: username,
+              divisi: divisi,
             },
           });
 
@@ -224,10 +214,10 @@ export async function PUT(
 
           const data = {
             newid,
-            name: `${ipAddress.ip}-${NamaAplikasi}`,
+            name: `${NamaAplikasi}`,
             target: `${selectedNode}`,
             full: 1,
-            pool: user?.divisi.nama,
+            pool: divisi,
             storage: "G350",
           };
 
@@ -453,9 +443,10 @@ export async function PUT(
             data: {
               vmid: newid,
               id_template: Number(server.id_template),
-              id_user: pengajuan.id_user,
               id_ip: ipAddress.id,
               segment: segment,
+              user: username,
+              divisi,
             },
           });
 
@@ -463,23 +454,14 @@ export async function PUT(
             vmList.find((vm: { vmid: any }) => vm.vmid == vmid_old)?.node ||
             null;
 
-          const user = await prisma.user.findUnique({
-            where: {
-              id: userId,
-            },
-            include: {
-              divisi: true,
-            },
-          });
-
           const NamaAplikasi = nama_baru.replace(/\s+/g, "-");
 
           const data = {
             newid,
-            name: `${ipAddress.ip}-${NamaAplikasi}`,
+            name: `${NamaAplikasi}`,
             target: `${selectedNode}`,
             full: 1,
-            pool: user?.divisi.nama,
+            pool: divisi,
             storage: "G350",
           };
 

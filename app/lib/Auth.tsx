@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 
 interface MyJwtPayload {
-  userId: string;
+  username: string;
   role: string;
+  divisi: string;
 }
 
 export function extractAndVerifyToken(req: Request): MyJwtPayload | null {
@@ -20,10 +21,22 @@ export function extractAndVerifyToken(req: Request): MyJwtPayload | null {
   const token = cookies?.token;
   if (!token) return null;
 
-  // Verifikasi token
   try {
     return jwt.verify(token, JWT_SECRET) as MyJwtPayload;
   } catch {
     return null;
   }
+}
+
+export function extractTokenFromCookies(req: Request): string | undefined {
+  const cookieHeader = req.headers.get("cookie");
+  if (!cookieHeader) return;
+
+  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+
+  return cookies?.token;
 }

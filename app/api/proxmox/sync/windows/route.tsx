@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 import https from "https";
-import { respondWithSuccess } from "@/app/lib/Response";
+import { respondWithError, respondWithSuccess } from "@/app/lib/Response";
+import { PrismaClient } from "@prisma/client";
+import { extractAndVerifyToken } from "@/app/lib/Auth";
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
+  const decodedToken = extractAndVerifyToken(request);
+
+  if (!decodedToken) {
+    return respondWithError("Invalid or expired token", 401);
+  }
+
+  const { username, divisi } = decodedToken;
+
   const { ipAddress, subnetMask, gateway, dnsServer, node, vmid } =
     await request.json();
 
@@ -81,6 +92,15 @@ export async function POST(request: Request) {
     );
 
     const output = resultResponse.data.data["out-data"];
+
+    const log = await prisma.logVM.create({
+      data: {
+        user: username,
+        divisi: divisi,
+        activity: "IPSync",
+        vmid: Number(vmid),
+      },
+    });
 
     return respondWithSuccess(
       "Berhasil melakukan sinkronisasi IP Address",

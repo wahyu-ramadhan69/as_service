@@ -23,7 +23,7 @@ interface BucketPengajuan {
   tanggal_pengajuan: string;
   nama_baru: string;
   vmid_old: number;
-  user: User;
+  user: string;
   template: Template;
 }
 
@@ -160,6 +160,16 @@ export default function BucketPengajuanUi() {
       setBucketPengajuan(updateBucket);
       setCurrentBucketPengajuan(null);
     }
+  };
+
+  const formatTanggal = (tanggal: string) => {
+    const date = new Date(tanggal);
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return date.toLocaleDateString("id-ID", options);
   };
 
   const handleApproveBucketPengajuan = (bucketPengajuan: BucketPengajuan) => {
@@ -301,8 +311,12 @@ export default function BucketPengajuanUi() {
                   <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                     Segment
                   </th>
+
                   <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                     Nama Aplikasi
+                  </th>
+                  <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    Tanggal
                   </th>
                   <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                     Jenis Pengajuan
@@ -337,6 +351,9 @@ export default function BucketPengajuanUi() {
                       {p.jenis_pengajuan === "Existing"
                         ? `${p.nama_baru}`
                         : `${p.nama_aplikasi}`}
+                    </td>
+                    <td className="px-6 py-4 border-b border-gray-200 text-sm">
+                      {formatTanggal(p.tanggal_pengajuan)}
                     </td>
                     <td className="px-6 py-4 border-b border-gray-200 text-sm">
                       <span

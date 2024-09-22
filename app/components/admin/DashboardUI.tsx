@@ -24,6 +24,8 @@ interface LogEvent {
   tanggal_activity: string;
   tujuan: string;
   vmid: number;
+  user: string;
+  divisi: string;
 }
 
 interface ApiResponse {
@@ -198,32 +200,58 @@ const DashboardMenu: React.FC = () => {
               </div>
             ) : (
               <div className="rounded-lg bg-slate-100 p-4">
-                {logEvent.map((item) => (
-                  <div
-                    className="flex items-center justify-between gap-3 py-2"
-                    key={item.id}
-                  >
-                    <div className="flex items-center gap-2">
-                      {item.activity === "Console" ? (
-                        <VscTerminalPowershell className="rounded-full bg-slate-600 p-2 text-3xl font-bold text-white" />
-                      ) : item.activity === "Restart" ? (
-                        <VscDebugRestart className="rounded-full bg-sky-400 p-2 text-3xl font-bold text-white" />
-                      ) : item.activity === "PowerOff" ? (
-                        <GrPowerShutdown className="rounded-full bg-red-400 p-2 text-3xl font-bold text-white" />
-                      ) : item.activity === "PowerOn" ? (
-                        <VscDebugStart className="rounded-full bg-green-400 p-2 text-3xl font-bold text-white" />
-                      ) : item.activity === "IPSync" ? (
-                        <AiOutlineSync className="rounded-full bg-purple-400 p-2 text-3xl font-bold text-white" />
-                      ) : (
-                        <></>
-                      )}
-                      <h1 className="font-normal text-slate-500">
-                        {item.activity}
-                      </h1>
-                    </div>
-                    <span className="text-slate-500">{item.vmid}</span>
-                  </div>
-                ))}
+                <table className="table-auto">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2 text-xs">#</th>
+                      <th className="px-4 py-2 text-xs">Action</th>
+                      <th className="px-4 py-2 text-xs">User</th>
+                      <th className="px-4 py-2 text-xs">Divisi</th>
+                      <th className="px-4 py-2 text-xs">VM ID</th>
+                    </tr>
+                  </thead>
+                  {logEvent.map((item) => (
+                    <tbody>
+                      <tr>
+                        <td className="px-4 py-2">
+                          {item.activity === "Console" ? (
+                            <VscTerminalPowershell className="rounded-full bg-slate-600 p-2 text-3xl font-bold text-white" />
+                          ) : item.activity === "Restart" ? (
+                            <VscDebugRestart className="rounded-full bg-sky-400 p-2 text-3xl font-bold text-white" />
+                          ) : item.activity === "PowerOff" ? (
+                            <GrPowerShutdown className="rounded-full bg-red-400 p-2 text-3xl font-bold text-white" />
+                          ) : item.activity === "PowerOn" ? (
+                            <VscDebugStart className="rounded-full bg-green-400 p-2 text-3xl font-bold text-white" />
+                          ) : item.activity === "IPSync" ? (
+                            <AiOutlineSync className="rounded-full bg-purple-400 p-2 text-3xl font-bold text-white" />
+                          ) : (
+                            <></>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          <h1 className="font-normal text-xs text-slate-500">
+                            {item.activity}
+                          </h1>
+                        </td>
+                        <td className="px-4 py-2">
+                          <h1 className="font-normal text-xs text-slate-500">
+                            {item.user}
+                          </h1>
+                        </td>
+                        <td className="px-4 py-2">
+                          <h1 className="font-normal text-xs text-slate-500">
+                            {item.divisi}
+                          </h1>
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className="text-slate-500 text-xs">
+                            {item.vmid}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  ))}
+                </table>
               </div>
             )}
           </div>

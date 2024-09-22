@@ -3,10 +3,11 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { respondWithError, respondWithSuccess } from "@/app/lib/Response";
+// import {Attribute} from 'ldapjs'
 
 const prisma = new PrismaClient();
 
-const JWT_SECRET = "rahasia";
+const JWT_SECRET = process.env.JWT_SECRET || "rahasia";
 
 export async function POST(req: NextRequest) {
   const { username, password } = await req.json();
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
   try {
     const user = await prisma.user.findUnique({
       where: { username },
+      include: {
+        divisi: true,
+      },
     });
 
     if (!user) {
@@ -26,14 +30,13 @@ export async function POST(req: NextRequest) {
     }
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role, username: user.username },
+      { username: user.username, role: user.role, divisi: user.divisi.nama },
       JWT_SECRET,
       {
         expiresIn: "1h",
       }
     );
 
-    // Respond with success and set the token in cookies
     const response = respondWithSuccess("Login successful", { token }, 200);
     response.cookies.set("token", token, {
       httpOnly: true,

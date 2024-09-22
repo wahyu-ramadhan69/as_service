@@ -24,15 +24,11 @@ interface LogEvent {
   tanggal_activity: string;
   tujuan: string;
   vmid: number;
-  user: User;
-}
-
-interface User {
-  username: string;
+  user: string;
 }
 
 interface ApiResponse {
-  divisi: {
+  quota: {
     cpu: number;
     id: number;
     nama: string;
@@ -56,7 +52,6 @@ const DashboardMenu: React.FC = () => {
       try {
         const response = await fetch("/api/proxmox/vms/logvm");
         const data = await response.json();
-        console.log(data);
 
         setLogEvent(data.data || []);
       } catch (error) {
@@ -79,21 +74,21 @@ const DashboardMenu: React.FC = () => {
             id: 1,
             label: "CPU's",
             used: data.totalMaxCpu,
-            total: data.divisi.cpu,
+            total: data.quota.cpu,
             color: "bg-green-100",
           },
           {
             id: 2,
             label: "RAM",
             used: data.totalMaxMemGB,
-            total: data.divisi.ram,
+            total: data.quota.ram,
             color: "bg-blue-100",
           },
           {
             id: 3,
             label: "Storage",
             used: data.totalMaxDiskGB,
-            total: data.divisi.storage,
+            total: data.quota.storage,
             color: "bg-orange-100",
           },
         ];
@@ -239,7 +234,7 @@ const DashboardMenu: React.FC = () => {
                         </td>
                         <td className="px-4 py-2">
                           <h1 className="font-normal text-xs text-slate-500">
-                            {item.user.username}
+                            {item.user}
                           </h1>
                         </td>
                         <td className="px-4 py-2">

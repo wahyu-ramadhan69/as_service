@@ -36,19 +36,11 @@ export async function POST(req: Request) {
       return respondWithError("Invalid or expired token", 401);
     }
 
-    const user = await fetchUserWithDivisi(decodedToken.userId);
-
-    if (!user) {
-      return respondWithError("User not found", 404);
-    }
+    const { username, role, divisi } = decodedToken;
 
     const requestData = await req.json();
 
-    console.log(requestData);
-
     if (requestData.jenis_pengajuan === "Perubahan") {
-      console.log("masuk kesini");
-
       const vmResponse = await axios.get(
         `${process.env.PROXMOX_API_URL}/nodes/${requestData.node}/qemu/${requestData.vmid}/status/current`,
         {
@@ -58,9 +50,6 @@ export async function POST(req: Request) {
       );
 
       const vmStorage = vmResponse.data.data.maxdisk / (1024 * 1024 * 1024);
-
-      console.log(requestData.storage);
-      console.log(vmStorage);
 
       if (requestData.storage < vmStorage) {
         return respondWithError(`Storage tidak bisa dikecilkan`, 400);
@@ -79,16 +68,13 @@ export async function POST(req: Request) {
       return respondWithError("Nama aplikasi baru tidak boleh kosong", 400);
     }
 
-    const validationError = await validateResourceRequest(
-      requestData,
-      user.divisi
-    );
+    const validationError = await validateResourceRequest(requestData, divisi);
 
     if (validationError) {
       return respondWithError(validationError, 400);
     }
 
-    const pengajuan = await createPengajuan(requestData, user);
+    const pengajuan = await createPengajuan(requestData, username, divisi);
 
     return respondWithSuccess(
       "Berhasil membuat pengajuan server",
@@ -120,26 +106,29 @@ function verifyToken(token: string): MyJwtPayload | null {
   }
 }
 
-async function fetchUserWithDivisi(userId: number) {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    include: { divisi: true },
-  });
-}
-
 async function validateResourceRequest(
   requestData: any,
-  divisi: any
+  divisi: string
 ): Promise<string | null> {
   const { cpu, ram, storage } = requestData;
 
   const response = await axios.get(
-    `${process.env.PROXMOX_API_URL}/pools/${divisi.nama}`,
+    `${process.env.PROXMOX_API_URL}/pools/${divisi}`,
     {
       headers,
       httpsAgent,
     }
   );
+
+  const quota = await prisma.divisi.findUnique({
+    where: {
+      nama: divisi,
+    },
+  });
+
+  if (!quota) {
+    return "divisi tidak ditemukan";
+  }
 
   type Member = {
     maxcpu: number;
@@ -163,15 +152,19 @@ async function validateResourceRequest(
   const ramReq = Math.floor(totalMaxMemGB) + ram / 1024;
   const diskReq = Math.floor(totalMaxDiskGB) + storage;
 
-  if (cpuReq > divisi.cpu) return "Quota cpu pada divisimu tidak mencukupi";
-  if (ramReq > divisi.ram) return "Quota ram pada divisimu tidak mencukupi";
-  if (diskReq > divisi.storage)
+  if (cpuReq > quota.ram) return "Quota cpu pada divisimu tidak mencukupi";
+  if (ramReq > quota.ram) return "Quota ram pada divisimu tidak mencukupi";
+  if (diskReq > quota.storage)
     return "Quota storage pada divisimu tidak mencukupi";
 
   return null;
 }
 
-async function createPengajuan(requestData: any, user: any) {
+async function createPengajuan(
+  requestData: any,
+  username: string,
+  divisi: string
+) {
   let {
     id_template,
     cpu,
@@ -207,16 +200,16 @@ async function createPengajuan(requestData: any, user: any) {
     ram: parseInt(ram, 10),
     storage: parseInt(storage, 10),
     segment,
-    id_user: user.id,
     status_pengajuan: "Waiting For Dept Head",
     nama_aplikasi,
     tujuan_pengajuan,
-    id_divisi: user.divisi.id,
     jenis_pengajuan,
     nama_baru,
     vmid: vmid,
     vmid_old,
     nodes: node,
+    user: username,
+    divisi: divisi,
   };
 
   return prisma.pengajuan.create({
@@ -241,7 +234,7 @@ export async function GET(req: Request) {
       return respondWithError("Invalid or expired token", 401);
     }
 
-    const { userId, role } = decodedToken;
+    const { username, role, divisi } = decodedToken;
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -251,9 +244,19 @@ export async function GET(req: Request) {
     let pengajuan, totalData;
 
     if (role === "USER") {
-      [pengajuan, totalData] = await fetchPengajuanForUser(userId, skip, limit);
+      [pengajuan, totalData] = await fetchPengajuanForUser(
+        username,
+        divisi,
+        skip,
+        limit
+      );
     } else if (role === "HEAD") {
-      [pengajuan, totalData] = await fetchPengajuanForHead(userId, skip, limit);
+      [pengajuan, totalData] = await fetchPengajuanForHead(
+        username,
+        divisi,
+        skip,
+        limit
+      );
     } else {
       return respondWithError("Access denied", 403);
     }
@@ -279,13 +282,14 @@ export async function GET(req: Request) {
 }
 
 async function fetchPengajuanForUser(
-  userId: number,
+  username: string,
+  divisi: string,
   skip: number,
   limit: number
 ) {
   const pengajuan = await prisma.pengajuan.findMany({
     where: {
-      id_user: userId,
+      user: username,
     },
     orderBy: {
       tanggal_pengajuan: "desc",
@@ -299,7 +303,7 @@ async function fetchPengajuanForUser(
 
   const totalData = await prisma.pengajuan.count({
     where: {
-      id_user: userId,
+      user: username,
     },
   });
 
@@ -307,22 +311,14 @@ async function fetchPengajuanForUser(
 }
 
 async function fetchPengajuanForHead(
-  userId: number,
+  username: string,
+  divisi: string,
   skip: number,
   limit: number
 ) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { divisi: true },
-  });
-
-  if (!user || !user.divisi) {
-    throw new Error("User or divisi not found");
-  }
-
   const pengajuan = await prisma.pengajuan.findMany({
     where: {
-      id_divisi: user.divisi.id,
+      divisi,
       status_pengajuan: {
         in: ["Waiting For Dept Head", "Proses pengerjaan"],
       },
@@ -333,14 +329,13 @@ async function fetchPengajuanForHead(
     skip: skip,
     take: limit,
     include: {
-      user: true,
       template: true,
     },
   });
 
   const totalData = await prisma.pengajuan.count({
     where: {
-      id_divisi: user.divisi.id,
+      divisi,
       status_pengajuan: {
         in: ["Waiting For Dept Head", "Proses pengerjaan"],
       },

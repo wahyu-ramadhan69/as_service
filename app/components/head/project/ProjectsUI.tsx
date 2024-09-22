@@ -21,6 +21,7 @@ import ConsoleModal from "./ConsoleUi";
 import Title from "../../Title";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SyncIPModal from "./SyncIPModal";
 
 interface Member {
   name: string;
@@ -35,6 +36,7 @@ interface Member {
   username: string;
   ip: string;
   type_os: string;
+  segment: string;
 }
 
 const ProjectUI = () => {
@@ -46,6 +48,8 @@ const ProjectUI = () => {
   const [isPowerOffModal, setIsPowerOffModal] = useState(false);
   const [selectedPowerOn, setSelectedPowerOn] = useState<Member | null>(null);
   const [isPowerOnModal, setIsPowerOnModal] = useState(false);
+  const [selectedSync, setSelectedSync] = useState<Member | null>(null);
+  const [isSyncModal, setIsSyncModal] = useState(false);
   const [selectedRestart, setSelectedRestart] = useState<Member | null>(null);
   const [isRestartModal, setIsRestartModal] = useState(false);
   const [selectedConsole, setSelectedConsole] = useState<Member | null>(null);
@@ -105,6 +109,16 @@ const ProjectUI = () => {
   const handleRestart = (item: Member) => {
     setSelectedRestart(item);
     setIsRestartModal(true);
+  };
+
+  const handleSync = (item: Member) => {
+    setSelectedSync(item);
+    setIsSyncModal(true);
+  };
+
+  const closeModalSync = async () => {
+    setIsSyncModal(false);
+    setSelectedSync(null);
   };
 
   const handleOpenConsole = (item: Member) => {
@@ -335,13 +349,12 @@ const ProjectUI = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-2 flex justify-center items-center">
+                      {/* <div className="text-xs text-gray-600 mb-2 flex justify-center items-center">
                         <FaServer className="text-sm mr-2" /> {item.node}
-                      </div>
+                      </div> */}
                       <div className="text-xs text-gray-600 mb-2 flex justify-center items-center">
                         <TbLocationPin className="text-xl mr-2" /> {item.ip}
                       </div>
-
                       <table>
                         <tbody>
                           <tr>
@@ -426,9 +439,11 @@ const ProjectUI = () => {
                               <GrPowerShutdown className="text-2xl text-white" />
                             </button>
                           )}
-                          <button className="bg-violet-400 text-white w-1/2 m-1 flex justify-center items-center rounded">
-                            <AiOutlineSync className=" text-2xl text-white mr-1" />{" "}
-                            IP Address
+                          <button
+                            className="bg-violet-400 text-white w-1/2 m-1 flex justify-center items-center rounded"
+                            onClick={() => handleSync(item)}
+                          >
+                            <AiOutlineSync className=" text-2xl text-white mr-1" />
                           </button>
                         </div>
                       </div>
@@ -504,6 +519,14 @@ const ProjectUI = () => {
             isOpen={isConsoleModal}
             onClose={closeModalConsole}
             data={selectedConsole}
+          />
+        )}
+
+        {selectedSync && (
+          <SyncIPModal
+            isOpen={isSyncModal}
+            onClose={closeModalSync}
+            data={selectedSync}
           />
         )}
       </>

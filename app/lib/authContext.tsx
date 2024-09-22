@@ -13,7 +13,11 @@ import { toast } from "react-toastify";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (
+    username: string,
+    password: string,
+    authWith: string
+  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -75,21 +79,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (username: string, password: string) => {
+  const login = async (
+    username: string,
+    password: string,
+    authWith: string
+  ) => {
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      console.log(authWith);
+
+      const response = await fetch(
+        `${authWith === "BCAFWIFI" ? "/api/auth/ldap" : "/api/auth/login"}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
       const result = await response.json();
 
       if (response.ok) {
-        const { data } = result; // Access the `data` object from the result
-        const { token } = data; // Extract the token from `data`
+        const { data } = result;
+        const { token } = data;
 
         if (token) {
           localStorage.setItem("token", token);
@@ -98,7 +111,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setIsAuthenticated(true);
             navigateToRole(decodedToken.role);
           } catch (error) {
-            console.error("Invalid token:", error);
             localStorage.removeItem("token");
             toast.error("Invalid token");
           }

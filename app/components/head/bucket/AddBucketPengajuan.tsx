@@ -29,7 +29,7 @@ interface BucketPengajuan {
   tanggal_pengajuan: string;
   nama_baru: string;
   vmid_old: number;
-  user: User;
+  user: string;
   template: Template;
 }
 
@@ -62,12 +62,25 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
     vmid: 0,
     cpu_sekarang: 0,
     ram_sekarang: 0,
+    tanggal_pengajuan: "",
     storage_sekarang: 0,
     username: "",
-    email: "",
     nama_baru: "",
     vmid_old: 0,
   });
+
+  const formatTanggal = (tanggal: string) => {
+    const date = new Date(tanggal);
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long", // Correct type for weekday
+      year: "numeric",
+      month: "long", // Correct type for month
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return date.toLocaleDateString("id-ID", options);
+  };
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [loadingReject, setLoadingReject] = useState(false);
@@ -88,10 +101,10 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
         cpu_sekarang: bucketPengajuan.cpu,
         ram_sekarang: bucketPengajuan.ram,
         storage_sekarang: bucketPengajuan.storage,
-        username: bucketPengajuan.user.username,
-        email: bucketPengajuan.user.email,
+        username: bucketPengajuan.user,
         nama_baru: bucketPengajuan.nama_baru,
         vmid_old: bucketPengajuan.vmid_old,
+        tanggal_pengajuan: bucketPengajuan.tanggal_pengajuan,
       });
     } else {
       setFormData({
@@ -109,9 +122,9 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
         ram_sekarang: 0,
         storage_sekarang: 0,
         username: "",
-        email: "",
         nama_baru: "",
         vmid_old: 0,
+        tanggal_pengajuan: "",
       });
     }
   }, [bucketPengajuan]);
@@ -149,9 +162,9 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
           ram_sekarang: 0,
           storage_sekarang: 0,
           username: "",
-          email: "",
           nama_baru: "",
           vmid_old: 0,
+          tanggal_pengajuan: "",
         });
 
         toast.success(result.message || "Pengajuan berhasil dibuat");
@@ -201,9 +214,9 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
           ram_sekarang: 0,
           storage_sekarang: 0,
           username: "",
-          email: "",
           nama_baru: "",
           vmid_old: 0,
+          tanggal_pengajuan: "",
         });
         toast.success(result.message || "Reject server berhasil dilakukan");
       } else {
@@ -307,9 +320,11 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
                   {formData.jenis_pengajuan}
                 </span>
                 <h1 className="mt-4 text-base font-semibold text-gray-700">
-                  Email
+                  Tanggal Pengajuan:
                 </h1>
-                <span className="text-sm text-gray-600">{formData.email}</span>
+                <span className="text-sm text-gray-600">
+                  {formatTanggal(formData.tanggal_pengajuan)}
+                </span>
               </div>
             </div>
             <div className="mt-6 flex items-center justify-start">

@@ -15,20 +15,16 @@ model User {
   email     String      @unique
   id_divisi Int
   divisi    Divisi      @relation(fields: [id_divisi], references: [id])
-  pengajuan Pengajuan[]
-  server    Server[]
-  log_vm    LogVM[]
 }
 
 model Divisi {
   id           Int         @id @default(autoincrement())
-  nama         String
+  nama         String      @unique
   cpu          Int
   storage      Int
   ram          Int
   nama_storage String?
   users        User[]
-  pengajuan    Pengajuan[]
 }
 
 model Pengajuan {
@@ -39,32 +35,30 @@ model Pengajuan {
   ram               Int?
   storage           Int?
   segment           String?
-  id_user           Int
-  user              User           @relation(fields: [id_user], references: [id])
   status_pengajuan  String
   nama_aplikasi     String
   tanggal_pengajuan DateTime       @default(now())
   tanggal_perubahan DateTime       @updatedAt
   tujuan_pengajuan  String
-  id_divisi         Int
-  divisi            Divisi         @relation(fields: [id_divisi], references: [id])
   jenis_pengajuan   JenisPengajuan
   vmid              Int?
   nodes             String?
   nama_baru         String?
   vmid_old          Int?
+  user              String
+  divisi            String
 }
 
 model Server {
   id          Int       @id @default(autoincrement())
   vmid        Int       @unique
-  id_user     Int
-  user        User      @relation(fields: [id_user], references: [id])
   segment     String?
   id_ip       Int
   ip_address  IpAddress @relation(fields: [id_ip], references: [id])
   id_template Int
   template    Template  @relation(fields: [id_template], references: [id])
+  user        String
+  divisi      String
 }
 
 model IpAddress {
@@ -92,8 +86,8 @@ model Template {
 
 model LogVM {
   id               Int      @id @default(autoincrement())
-  id_user          Int
-  user             User     @relation(fields: [id_user], references: [id])
+  user             String
+  divisi           String
   activity         Activity
   vmid             Int
   tujuan           String?

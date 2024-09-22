@@ -35,21 +35,16 @@ export async function GET(req: Request) {
       return respondWithError("Invalid or expired token", 401);
     }
 
-    const { userId } = decodedToken;
+    const { username, role, divisi } = decodedToken;
 
-    const user = await prisma.user.findUnique({
+    const quota = await prisma.divisi.findUnique({
       where: {
-        id: userId,
-      },
-      include: {
-        divisi: true,
+        nama: divisi,
       },
     });
 
-    const divisi = user?.divisi;
-
     const response = await axios.get(
-      `${process.env.PROXMOX_API_URL}/pools/${user?.divisi.nama}`,
+      `${process.env.PROXMOX_API_URL}/pools/${divisi}`,
       {
         headers,
         httpsAgent,
@@ -78,11 +73,13 @@ export async function GET(req: Request) {
     );
 
     const responseData = {
-      divisi,
+      quota,
       totalMaxCpu,
       totalMaxMemGB: Math.floor(totalMaxMemGB),
       totalMaxDiskGB: Math.floor(totalMaxDiskGB),
     };
+
+    console.log(responseData);
 
     return NextResponse.json(responseData, { status: 200 });
   } catch (error) {

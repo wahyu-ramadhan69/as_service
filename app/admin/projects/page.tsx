@@ -1,6 +1,6 @@
 "use client";
 
-import ProjectUI from "@/app/components/admin/ProjectUI";
+import ProjectUI from "@/app/components/admin/server/ProjectUI";
 import React from "react";
 
 const TeamPage = () => {
