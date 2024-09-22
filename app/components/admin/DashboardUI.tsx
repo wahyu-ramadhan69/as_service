@@ -140,7 +140,7 @@ const DashboardMenu: React.FC = () => {
                 <div className="flex flex-wrap gap-4">
                   {summaries.map((item) => (
                     <div
-                      key={item.label}
+                      key={item.id}
                       className={`flex w-[100%] ${item.color} items-center justify-between rounded-lg p-8 lg:w-[31%]`}
                     >
                       <div className="flex flex-col gap-3">
@@ -211,7 +211,7 @@ const DashboardMenu: React.FC = () => {
                     </tr>
                   </thead>
                   {logEvent.map((item) => (
-                    <tbody>
+                    <tbody key={item.id}>
                       <tr>
                         <td className="px-4 py-2">
                           {item.activity === "Console" ? (
