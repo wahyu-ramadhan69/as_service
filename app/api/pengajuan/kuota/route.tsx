@@ -79,8 +79,6 @@ export async function GET(req: Request) {
       totalMaxDiskGB: Math.floor(totalMaxDiskGB),
     };
 
-    console.log(responseData);
-
     return NextResponse.json(responseData, { status: 200 });
   } catch (error) {
     console.error("Error fetching pengajuan:", error);
