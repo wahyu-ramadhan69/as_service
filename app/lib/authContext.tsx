@@ -87,7 +87,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     try {
       const response = await fetch(
-        `${authWith === "BCAFWIFI" ? process.env.LDAP_URL : "/api/auth/login"}`,
+        `${
+          authWith === "BCAFWIFI"
+            ? "http://localhost:3000/auth"
+            : "/api/auth/login"
+        }`,
         {
           method: "POST",
           headers: {
@@ -107,7 +111,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem("token", token);
 
           if (authWith === "BCAFWIFI") {
-            Cookies.set("token", token, { expires: 1 / 24, secure: true });
+            Cookies.set("token", token, {
+              expires: 1 / 24,
+              secure: true,
+            });
           }
           try {
             const decodedToken: DecodedToken = jwtDecode(token);
