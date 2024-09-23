@@ -1,12 +1,18 @@
 import https from "https";
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { respondWithError } from "@/app/lib/Response";
-import { extractAndVerifyToken, extractTokenFromCookies } from "@/app/lib/Auth";
 import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
+
 const JWT_SECRET = process.env.JWT_SECRET || "rahasia";
+
+interface MyJwtPayload {
+  username: string;
+  role: string;
+  divisi: string;
+}
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
@@ -116,5 +122,25 @@ async function testProxmoxConnection() {
   } catch (error) {
     console.error("Error testing Proxmox connection:", error);
     return false;
+  }
+}
+
+function extractAndVerifyToken(req: Request): MyJwtPayload | null {
+  const cookieHeader = req.headers.get("cookie");
+  if (!cookieHeader) return null;
+
+  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const token = cookies?.token;
+  if (!token) return null;
+
+  try {
+    return jwt.verify(token, JWT_SECRET) as MyJwtPayload;
+  } catch {
+    return null;
   }
 }

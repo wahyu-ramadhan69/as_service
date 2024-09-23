@@ -1,16 +1,29 @@
 // app/api/templates/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { extractAndVerifyToken } from "@/app/lib/Auth";
 import { respondWithError, respondWithSuccess } from "@/app/lib/Response";
+import jwt from "jsonwebtoken";
+
+interface MyJwtPayload {
+  username: string;
+  role: string;
+  divisi: string;
+}
 
 const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
     const decodedToken = extractAndVerifyToken(req);
+
     if (!decodedToken) {
       return respondWithError("Invalid or missing token", 401);
+    }
+
+    const { role } = decodedToken;
+
+    if (role != "ADMIN") {
+      return respondWithError("You do not have access to this page", 401);
     }
 
     const templates = await prisma.template.findMany();
@@ -27,6 +40,7 @@ export async function POST(req: Request) {
     return respondWithError("Invalid or missing token", 401);
   }
   const { role } = decodedToken;
+
   if (role != "ADMIN") {
     return respondWithError("You do not have access to this page", 401);
   }
@@ -58,5 +72,27 @@ export async function POST(req: Request) {
       { error: error.message || "Failed to create template", statusCode: 500 },
       { status: 500 }
     );
+  }
+}
+
+function extractAndVerifyToken(req: Request): MyJwtPayload | null {
+  const JWT_SECRET = process.env.JWT_SECRET as string;
+
+  const cookieHeader = req.headers.get("cookie");
+  if (!cookieHeader) return null;
+
+  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const token = cookies?.token;
+  if (!token) return null;
+
+  try {
+    return jwt.verify(token, JWT_SECRET) as MyJwtPayload;
+  } catch {
+    return null;
   }
 }
