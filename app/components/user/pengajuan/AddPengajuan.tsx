@@ -421,13 +421,13 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                       </select>
                     </div>
 
-                    {/* Nama Aplikasi */}
+                    {/* Nama Server */}
                     <div className="mb-4">
                       <label
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="nama_aplikasi"
                       >
-                        Nama Aplikasi
+                        Nama Server
                       </label>
                       <input
                         id="nama_aplikasi"
@@ -524,13 +524,13 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Nama Aplikasi */}
+                    {/* Nama Server */}
                     <div className="mb-4">
                       <label
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="nama_aplikasi"
                       >
-                        Nama Aplikasi
+                        Nama Server
                       </label>
                       <input
                         id="nama_aplikasi"
@@ -627,7 +627,7 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                       className="block text-gray-700 text-sm font-bold mb-2"
                       htmlFor="nama_aplikasi"
                     >
-                      Nama Aplikasi Baru
+                      Nama Server Baru
                     </label>
                     <input
                       id="nama_baru"
@@ -722,13 +722,13 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Nama Aplikasi */}
+                    {/* Nama Server */}
                     <div className="mb-2">
                       <label
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="nama_aplikasi"
                       >
-                        Nama Aplikasi
+                        Nama Server
                       </label>
                       <input
                         id="nama_aplikasi"
@@ -923,13 +923,13 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Nama Aplikasi */}
+                    {/* Nama Server */}
                     <div className="mb-4">
                       <label
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="nama_aplikasi"
                       >
-                        Nama Aplikasi
+                        Nama Server
                       </label>
                       <input
                         id="nama_aplikasi"

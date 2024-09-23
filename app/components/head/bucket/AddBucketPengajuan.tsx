@@ -299,7 +299,7 @@ const AddBucketPengajuanModal: React.FC<AddBucketPengajuanModalProps> = ({
                 </span>
 
                 <h1 className="mt-4 text-base font-semibold text-gray-700">
-                  Nama Aplikasi:
+                  Nama Server:
                 </h1>
                 <span className="text-sm text-gray-600">
                   {formData.jenis_pengajuan === "Existing"

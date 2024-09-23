@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
+import Cookies from "js-cookie";
 import { useRouter, usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
@@ -85,10 +86,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     authWith: string
   ) => {
     try {
-      console.log(authWith);
-
       const response = await fetch(
-        `${authWith === "BCAFWIFI" ? "/api/auth/ldap" : "/api/auth/login"}`,
+        `${
+          authWith === "BCAFWIFI"
+            ? "http://localhost:3000/auth"
+            : "/api/auth/login"
+        }`,
         {
           method: "POST",
           headers: {
@@ -106,6 +109,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (token) {
           localStorage.setItem("token", token);
+
+          if (authWith === "BCAFWIFI") {
+            Cookies.set("token", token, { expires: 1 / 24, secure: true });
+          }
           try {
             const decodedToken: DecodedToken = jwtDecode(token);
             setIsAuthenticated(true);
