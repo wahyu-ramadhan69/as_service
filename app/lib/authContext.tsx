@@ -87,11 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     try {
       const response = await fetch(
-        `${
-          authWith === "BCAFWIFI"
-            ? "http://localhost:3000/auth"
-            : "/api/auth/login"
-        }`,
+        `${authWith === "BCAFWIFI" ? process.env.LDAP_URL : "/api/auth/login"}`,
         {
           method: "POST",
           headers: {

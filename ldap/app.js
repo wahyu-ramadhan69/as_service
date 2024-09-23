@@ -79,7 +79,6 @@ app.post("/auth", async (req, res) => {
   }
 });
 
-// Jalankan server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server berjalan pada port ${PORT}`);
