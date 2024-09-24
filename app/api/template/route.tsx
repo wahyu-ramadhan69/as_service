@@ -20,12 +20,6 @@ export async function GET(req: NextRequest) {
       return respondWithError("Invalid or missing token", 401);
     }
 
-    const { role } = decodedToken;
-
-    if (role != "ADMIN") {
-      return respondWithError("You do not have access to this page", 401);
-    }
-
     const templates = await prisma.template.findMany();
 
     return respondWithSuccess("Data fetched successfully", templates, 200);
