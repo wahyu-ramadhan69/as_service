@@ -149,7 +149,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.ok) {
         document.cookie =
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        // se
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         router.push("/auth/login");

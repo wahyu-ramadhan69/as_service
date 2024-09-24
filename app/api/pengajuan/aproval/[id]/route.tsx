@@ -202,7 +202,7 @@ export async function PUT(
           const server = await prisma.server.create({
             data: {
               vmid: newid,
-              id_template: Number(id_template),
+              id_template: Number(pengajuan.id_template),
               id_ip: ipAddress.id,
               segment: segment,
               user: username,
@@ -249,8 +249,8 @@ export async function PUT(
           const config = await axios.put(
             `${process.env.PROXMOX_API_URL}/nodes/${selectedNode}/qemu/${newid}/config`,
             {
-              memory: ram,
-              cores: cpu,
+              memory: pengajuan.ram,
+              cores: pengajuan.cpu,
               net0: `virtio,bridge=${bridge}`,
             },
             { headers, httpsAgent }
@@ -534,6 +534,9 @@ export async function PUT(
       );
     } else if (jenis_pengajuan === "Perubahan") {
       try {
+        if (!pengajuan) {
+          return respondWithError("pengajuanmu tidak ditemukan", 404);
+        }
         const server = await prisma.server.findUnique({
           where: {
             vmid: vmid,
@@ -607,42 +610,8 @@ export async function PUT(
           },
         });
 
-        const nodesResponse = await axios.get(
-          `${process.env.PROXMOX_API_URL}/nodes`,
-          {
-            headers,
-            httpsAgent,
-          }
-        );
-
-        const nodes = nodesResponse.data.data;
-
-        let targetNode = null;
-        for (const node of nodes) {
-          try {
-            await axios.get(
-              `${process.env.PROXMOX_API_URL}/nodes/${node.node}/qemu/${vmid}/status/current`,
-              {
-                headers,
-                httpsAgent,
-              }
-            );
-            targetNode = node.node;
-            break;
-          } catch (error) {
-            continue;
-          }
-        }
-
-        if (!targetNode) {
-          return respondWithError(
-            `VM with ID ${vmid} not found in any node`,
-            404
-          );
-        }
-
         const vmResponse = await axios.get(
-          `${process.env.PROXMOX_API_URL}/nodes/${targetNode}/qemu/${vmid}/status/current`,
+          `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}/status/current`,
           {
             headers,
             httpsAgent,
@@ -652,8 +621,8 @@ export async function PUT(
         const vmStorage = vmResponse.data.data.maxdisk / (1024 * 1024 * 1024);
 
         const configPayload: any = {
-          memory: ram,
-          cores: cpu,
+          memory: pengajuan.ram,
+          cores: pengajuan.cpu,
         };
 
         if (segment != server.segment) {
@@ -663,16 +632,17 @@ export async function PUT(
         if (storage < vmStorage) {
           return respondWithError(`Storage tidak bisa dikecilkan`, 400);
         }
+
         const fixStorage = storage - vmStorage;
 
         await axios.put(
-          `${process.env.PROXMOX_API_URL}/nodes/${targetNode}/qemu/${vmid}/config`,
+          `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}/config`,
           configPayload,
           { headers, httpsAgent }
         );
 
         await axios.put(
-          `${process.env.PROXMOX_API_URL}/nodes/${targetNode}/qemu/${vmid}/resize`,
+          `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}/resize`,
           {
             disk: "scsi0",
             size: `+${fixStorage}G`,
@@ -711,55 +681,14 @@ export async function PUT(
         }
       }
     } else if (jenis_pengajuan === "Delete") {
-      const nodesResponse = await axios.get(
-        `${process.env.PROXMOX_API_URL}/nodes`,
-        {
-          headers,
-          httpsAgent,
-        }
-      );
-
-      const nodes = nodesResponse.data.data;
-
-      let targetNode = null;
-      for (const node of nodes) {
-        try {
-          // Try to get VM info from the node
-          await axios.get(
-            `${process.env.PROXMOX_API_URL}/nodes/${node.node}/qemu/${vmid}/status/current`,
-            {
-              headers,
-              httpsAgent,
-            }
-          );
-          targetNode = node.node;
-          break;
-        } catch (error) {
-          continue;
-        }
-      }
-
-      if (!targetNode) {
-        await prisma.pengajuan.update({
-          where: { id: Number(id) },
-          data: {
-            status_pengajuan: "Not Found",
-          },
-        });
-        return respondWithError(
-          `VM with ID ${vmid} not found in any node`,
-          401
-        );
-      }
-
       const statusVM = await axios.get(
-        `${process.env.PROXMOX_API_URL}/nodes/${targetNode}/qemu/${vmid}/status/current`,
+        `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}/status/current`,
         { headers, httpsAgent }
       );
 
       if (statusVM.data.data.status === "running") {
         return respondWithError(
-          `Shutdown VM ${vmid} untuk menghapus server`,
+          `Shutdown VM ${pengajuan.vmid} untuk menghapus server`,
           400
         );
       }
@@ -772,18 +701,21 @@ export async function PUT(
       });
 
       await axios.delete(
-        `${process.env.PROXMOX_API_URL}/nodes/${targetNode}/qemu/${vmid}`,
+        `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}`,
         { headers, httpsAgent }
       );
 
       const server = await prisma.server.findUnique({
         where: {
-          vmid: vmid,
+          vmid: Number(pengajuan.vmid),
         },
       });
 
       if (!server) {
-        return respondWithError(`Server dengan id${vmid} tidak ditemukan`, 400);
+        return respondWithError(
+          `Server dengan id${pengajuan.vmid} tidak ditemukan`,
+          400
+        );
       }
 
       await prisma.ipAddress.update({
@@ -793,7 +725,7 @@ export async function PUT(
 
       await prisma.server.delete({
         where: {
-          vmid,
+          vmid: Number(pengajuan.vmid),
         },
       });
 
