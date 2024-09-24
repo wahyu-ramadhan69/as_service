@@ -144,10 +144,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Sertakan cookie di request
       });
 
       if (response.ok) {
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         router.push("/auth/login");
