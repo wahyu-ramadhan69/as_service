@@ -14,6 +14,7 @@ interface Member {
   maxcpu: number;
   vmid: number;
   image: string;
+  ip: string;
 }
 
 interface ConsoleModalProps {
@@ -88,7 +89,7 @@ const ConsoleModal: React.FC<ConsoleModalProps> = ({
           <div className="bg-white px-4 pt-5 pb-4 relative">
             <div className="flex justify-between items-center">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Console
+                {data?.name} {data?.ip}
               </h3>
               <div className="flex justify-center items-center">
                 <button

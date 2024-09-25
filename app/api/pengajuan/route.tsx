@@ -316,7 +316,54 @@ async function fetchPengajuanForHead(
   skip: number,
   limit: number
 ) {
-  const pengajuan = await prisma.pengajuan.findMany({
+  let pengajuan: any;
+  let totalData: any;
+
+  if (username === "jjo") {
+    pengajuan = await prisma.pengajuan.findMany({
+      where: {
+        divisi: {
+          in: [
+            "IT-Infra",
+            "IT-Dev",
+            "IT-Middleware",
+            "IT-Maintenance",
+            "IT-Core",
+          ],
+        },
+        status_pengajuan: {
+          in: ["Waiting For Dept Head", "Proses pengerjaan"],
+        },
+      },
+      orderBy: {
+        tanggal_pengajuan: "desc",
+      },
+      skip: skip,
+      take: limit,
+      include: {
+        template: true,
+      },
+    });
+
+    totalData = await prisma.pengajuan.count({
+      where: {
+        divisi: {
+          in: [
+            "IT-Infra",
+            "IT-Dev",
+            "IT-Middleware",
+            "IT-Maintenance",
+            "IT-Core",
+          ],
+        },
+        status_pengajuan: {
+          in: ["Waiting For Dept Head", "Proses pengerjaan"],
+        },
+      },
+    });
+    return [pengajuan, totalData];
+  }
+  pengajuan = await prisma.pengajuan.findMany({
     where: {
       divisi,
       status_pengajuan: {
@@ -333,7 +380,7 @@ async function fetchPengajuanForHead(
     },
   });
 
-  const totalData = await prisma.pengajuan.count({
+  totalData = await prisma.pengajuan.count({
     where: {
       divisi,
       status_pengajuan: {
