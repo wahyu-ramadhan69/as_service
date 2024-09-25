@@ -66,15 +66,13 @@ export async function GET(
       }
     );
 
-    console.log(vmResponse.data.data);
-
     if (!vmResponse.data) {
       return respondWithError("VM status data is empty", 500);
     }
 
     const data = {
       targetNode,
-      vmStatus: vmResponse.data.data, // Fetching VM status data
+      vmStatus: vmResponse.data.data,
     };
 
     return NextResponse.json(
