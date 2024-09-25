@@ -32,7 +32,6 @@ const ProjectUI = () => {
       try {
         const response = await fetch("/api/projects");
         const result = await response.json();
-        console.log(result);
 
         if (result.data && result.data.members) {
           const mappedItems = result.data.members.map((member: Member) => {
