@@ -12,7 +12,7 @@ model User {
   username  String      @unique
   password  String
   role      Role
-  email     String      @unique
+  email     String
   id_divisi Int
   divisi    Divisi      @relation(fields: [id_divisi], references: [id])
 }

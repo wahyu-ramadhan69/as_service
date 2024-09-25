@@ -205,8 +205,8 @@ export async function PUT(
               id_template: Number(pengajuan.id_template),
               id_ip: ipAddress.id,
               segment: segment,
-              user: username,
-              divisi: divisi,
+              user: pengajuan.user,
+              divisi: pengajuan.divisi,
             },
           });
 
@@ -249,8 +249,8 @@ export async function PUT(
           const config = await axios.put(
             `${process.env.PROXMOX_API_URL}/nodes/${selectedNode}/qemu/${newid}/config`,
             {
-              memory: pengajuan.ram,
-              cores: pengajuan.cpu,
+              memory: String(pengajuan.ram),
+              cores: Number(pengajuan.cpu),
               net0: `virtio,bridge=${bridge}`,
             },
             { headers, httpsAgent }
@@ -445,8 +445,8 @@ export async function PUT(
               id_template: Number(server.id_template),
               id_ip: ipAddress.id,
               segment: segment,
-              user: username,
-              divisi,
+              user: pengajuan.user,
+              divisi: pengajuan.divisi,
             },
           });
 
@@ -534,9 +534,6 @@ export async function PUT(
       );
     } else if (jenis_pengajuan === "Perubahan") {
       try {
-        if (!pengajuan) {
-          return respondWithError("pengajuanmu tidak ditemukan", 404);
-        }
         const server = await prisma.server.findUnique({
           where: {
             vmid: vmid,
@@ -619,7 +616,6 @@ export async function PUT(
         );
 
         const vmStorage = vmResponse.data.data.maxdisk / (1024 * 1024 * 1024);
-
         const configPayload: any = {
           memory: pengajuan.ram,
           cores: pengajuan.cpu,
