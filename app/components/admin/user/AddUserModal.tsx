@@ -15,6 +15,7 @@ interface User {
   username: string;
   email: string;
   role: string;
+  jenis: string;
   divisi: Divisi | null;
 }
 
@@ -33,7 +34,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     username: "",
     password: "",
     role: "USER",
-    email: "",
+    email: "Ldap",
+    jenis: "",
     id_divisi: 0,
   });
 
@@ -47,6 +49,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         password: "",
         role: user.role,
         email: user.email,
+        jenis: user.jenis,
         id_divisi: user.divisi ? user.divisi.id : 0,
       });
     } else {
@@ -55,6 +58,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         password: "",
         role: "USER",
         email: "",
+        jenis: "Ldap",
         id_divisi: 0,
       });
     }
@@ -96,8 +100,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         body: JSON.stringify(formData),
       });
 
-      console.log(formData);
-
       if (response.ok) {
         const data = await response.json();
         setFormData({
@@ -105,6 +107,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           password: "",
           role: "USER",
           email: "",
+          jenis: "Ldap",
           id_divisi: 0,
         });
         toast.success(data.message);
@@ -195,7 +198,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     value={formData.password}
                     onChange={handleChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required={!user}
+                    // required={!user}
                   />
                   {/* {errorMessage && (
                     <p className="text-red-500 text-xs mt-2">{errorMessage}</p>
@@ -215,7 +218,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     value={formData.email}
                     onChange={handleChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
                   />
                 </div>
                 <div className="mb-4">
@@ -237,6 +239,25 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     <option value="USER">User</option>
                     <option value="HEAD">Head</option>
                     <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="role"
+                  >
+                    Jenis
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.jenis}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  >
+                    <option value="USER">Ldap</option>
+                    <option value="HEAD">Local</option>
                   </select>
                 </div>
                 <div className="mb-4">
