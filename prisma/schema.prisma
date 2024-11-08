@@ -10,9 +10,10 @@ generator client {
 model User {
   id        Int         @id @default(autoincrement())
   username  String      @unique
-  password  String
+  password  String?
   role      Role
-  email     String
+  email     String?
+  jenis     JenisUser?
   id_divisi Int
   divisi    Divisi      @relation(fields: [id_divisi], references: [id])
 }
@@ -112,6 +113,11 @@ enum Role {
   USER
   HEAD
   ADMIN
+}
+
+enum JenisUser {
+  Ldap
+  Local
 }
 
 enum Status {

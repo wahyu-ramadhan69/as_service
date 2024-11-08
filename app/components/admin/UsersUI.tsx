@@ -14,6 +14,7 @@ interface User {
   username: string;
   email: string;
   role: string;
+  jenis: string;
   divisi: Divisi | null;
 }
 
@@ -33,6 +34,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     password: "",
     role: "USER",
     email: "",
+    jenis: "",
     id_divisi: 0,
   });
 
@@ -46,6 +48,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         password: "",
         role: user.role,
         email: user.email,
+        jenis: user.jenis,
         id_divisi: user.divisi ? user.divisi.id : 0,
       });
     } else {
@@ -53,6 +56,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         username: "",
         password: "",
         role: "USER",
+        jenis: "",
         email: "",
         id_divisi: 0,
       });
@@ -104,6 +108,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           password: "",
           role: "USER",
           email: "",
+          jenis: "",
           id_divisi: 0,
         });
         onClose();
@@ -213,6 +218,25 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
+                </div>
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="role"
+                  >
+                    Role
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.jenis}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  >
+                    <option value="USER">Ldap</option>
+                    <option value="HEAD">Local</option>
+                  </select>
                 </div>
                 <div className="mb-4">
                   <label
@@ -461,6 +485,9 @@ export default function UserUi() {
                   Role
                 </th>
                 <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                  Jenis
+                </th>
+                <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Divisi
                 </th>
                 <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
@@ -479,6 +506,9 @@ export default function UserUi() {
                   </td>
                   <td className="px-6 py-4 border-b border-gray-200 text-sm">
                     {u.role}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200 text-sm">
+                    {u.jenis}
                   </td>
                   <td className="px-6 py-4 border-b border-gray-200 text-sm">
                     {u.divisi ? u.divisi.nama : "No Divisi"}

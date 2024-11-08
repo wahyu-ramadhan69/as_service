@@ -18,7 +18,6 @@ export default function Login() {
     login(username, password, authWith);
     setLoading(false);
   };
-
   return (
     <div className="lg:flex bg-white">
       <ToastContainer />
@@ -52,7 +51,7 @@ export default function Login() {
                   onChange={(e) => setAuthWith(e.target.value)}
                   required
                 >
-                  <option value="BCAFWIFI">BCAFWIFI</option>
+                  <option value="BCAFWIFI">BCAF</option>
                   <option value="LOCAL">LOCAL</option>
                 </select>
               </div>

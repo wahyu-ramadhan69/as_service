@@ -44,39 +44,68 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, password, role, email, id_divisi } = await req.json();
-    if (password.length < 4) {
+    const { username, password, role, jenis, email, id_divisi } =
+      await req.json();
+
+    console.log(jenis);
+
+    if (jenis === "Ldap") {
+      const newUser = await prisma.user.create({
+        data: {
+          username,
+          password: "",
+          role,
+          jenis,
+          email,
+          divisi: {
+            connect: { id: parseInt(id_divisi) },
+          },
+        },
+        include: {
+          divisi: true,
+        },
+      });
       return NextResponse.json(
-        { error: "Password minimal terdiri dari 4 karakter" },
-        { status: 400 }
+        {
+          message: "Data insert successfully",
+          data: newUser,
+          statusCode: 201,
+        },
+        { status: 201 }
+      );
+    } else {
+      if (password.length < 4) {
+        return NextResponse.json(
+          { error: "Password minimal terdiri dari 4 karakter" },
+          { status: 400 }
+        );
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await prisma.user.create({
+        data: {
+          username,
+          password: hashedPassword,
+          role,
+          email,
+          jenis,
+          divisi: {
+            connect: { id: parseInt(id_divisi) },
+          },
+        },
+        include: {
+          divisi: true,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Data insert successfully",
+          data: newUser,
+          statusCode: 201,
+        },
+        { status: 201 }
       );
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await prisma.user.create({
-      data: {
-        username,
-        password: hashedPassword,
-        role,
-        email,
-        divisi: {
-          connect: { id: parseInt(id_divisi) },
-        },
-      },
-      include: {
-        divisi: true,
-      },
-    });
-
-    return NextResponse.json(
-      {
-        message: "Data insert successfully",
-        data: newUser,
-        statusCode: 201,
-      },
-      { status: 201 }
-    );
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

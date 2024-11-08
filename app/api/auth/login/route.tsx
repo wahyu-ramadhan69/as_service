@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!user) {
+    if (!user || !user.password) {
       return respondWithError("User not found", 404);
     }
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 60 * 60,
     });
 
     return response;
