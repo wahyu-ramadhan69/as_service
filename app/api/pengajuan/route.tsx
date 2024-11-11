@@ -319,7 +319,7 @@ async function fetchPengajuanForHead(
   let pengajuan: any;
   let totalData: any;
 
-  if (username === "jjo") {
+  if (username === "20040394") {
     pengajuan = await prisma.pengajuan.findMany({
       where: {
         divisi: {
