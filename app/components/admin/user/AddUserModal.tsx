@@ -34,8 +34,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     username: "",
     password: "",
     role: "USER",
-    email: "Ldap",
-    jenis: "",
+    email: "",
+    jenis: "Ldap",
     id_divisi: 0,
   });
 
@@ -66,11 +66,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     const fetchDivisi = async () => {
       try {
         const res = await fetch("/api/divisi");
-        if (!res.ok) throw new Error("Network response was not ok");
+        if (!res.ok) throw new Error("Failed to fetch Divisi data.");
         const data = await res.json();
         setDivisi(data.data.divisies);
       } catch (error) {
         console.error("Failed to fetch divisi:", error);
+        toast.error("Failed to load Divisi options.");
       }
     };
 
@@ -80,11 +81,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]:
-        e.target.name === "id_divisi" ? Number(e.target.value) : e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "id_divisi" ? Number(value) : value,
+    }));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -115,7 +116,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         onClose();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error);
+        toast.error(errorData.error || "An error occurred.");
         setErrorMessage(errorData.error);
       }
     } catch (error) {
@@ -169,6 +170,25 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 <div className="mb-4">
                   <label
                     className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="jenis"
+                  >
+                    Jenis
+                  </label>
+                  <select
+                    id="jenis"
+                    name="jenis"
+                    value={formData.jenis}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  >
+                    <option value="Ldap">Ldap</option>
+                    <option value="Local">Local</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
                     htmlFor="username"
                   >
                     Username
@@ -184,26 +204,24 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     disabled={!!user} // Disable if editing
                   />
                 </div>
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="password"
-                  >
-                    Password
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    // required={!user}
-                  />
-                  {/* {errorMessage && (
-                    <p className="text-red-500 text-xs mt-2">{errorMessage}</p>
-                  )} */}
-                </div>
+                {formData.jenis === "Local" && (
+                  <div className="mb-4">
+                    <label
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                      htmlFor="password"
+                    >
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                )}
                 <div className="mb-4">
                   <label
                     className="block text-gray-700 text-sm font-bold mb-2"
@@ -244,25 +262,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 <div className="mb-4">
                   <label
                     className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="role"
-                  >
-                    Jenis
-                  </label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={formData.jenis}
-                    onChange={handleChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="USER">Ldap</option>
-                    <option value="HEAD">Local</option>
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
                     htmlFor="id_divisi"
                   >
                     Divisi
@@ -276,7 +275,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     required
                   >
                     <option value="">Select Divisi</option>
-
                     {divisi.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.nama}
@@ -297,6 +295,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

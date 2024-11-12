@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import https from "https";
+import { respondWithSuccess, respondWithError } from "@/app/lib/Response";
 
 const prisma = new PrismaClient();
 
@@ -47,7 +48,18 @@ export async function POST(req: NextRequest) {
     const { username, password, role, jenis, email, id_divisi } =
       await req.json();
 
-    console.log(jenis);
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+
+    console.log(username);
+    console.log(user);
+
+    if (user) {
+      return respondWithError("A user with this username already exists.", 409);
+    }
 
     if (jenis === "Ldap") {
       const newUser = await prisma.user.create({

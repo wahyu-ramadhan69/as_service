@@ -323,13 +323,7 @@ async function fetchPengajuanForHead(
     pengajuan = await prisma.pengajuan.findMany({
       where: {
         divisi: {
-          in: [
-            "IT-Infra",
-            "IT-Dev",
-            "IT-Middleware",
-            "IT-Maintenance",
-            "IT-Core",
-          ],
+          in: ["IT-Middleware", "IT-Maintenance", "IT-Core"],
         },
         status_pengajuan: {
           in: ["Waiting For Dept Head", "Proses pengerjaan"],
@@ -348,13 +342,7 @@ async function fetchPengajuanForHead(
     totalData = await prisma.pengajuan.count({
       where: {
         divisi: {
-          in: [
-            "IT-Infra",
-            "IT-Dev",
-            "IT-Middleware",
-            "IT-Maintenance",
-            "IT-Core",
-          ],
+          in: ["IT-Middleware", "IT-Maintenance", "IT-Core"],
         },
         status_pengajuan: {
           in: ["Waiting For Dept Head", "Proses pengerjaan"],
