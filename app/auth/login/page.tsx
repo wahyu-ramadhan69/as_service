@@ -1,27 +1,98 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "../../lib/authContext"; // Sesuaikan dengan path authContext Anda
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+interface DecodedToken {
+  role: string;
+}
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [authWith, setAuthWith] = useState("BCAFWIFI");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const router = useRouter();
+
+  const login = async (
+    username: string,
+    password: string,
+    authWith: string
+  ) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${authWith === "BCAFWIFI" ? "/api/auth/ldap" : "/api/auth/login"}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        const { data } = result;
+        const { token } = data;
+
+        if (token) {
+          localStorage.setItem("token", token);
+
+          if (authWith === "BCAFWIFI") {
+            Cookies.set("token", token, {
+              expires: 1 / 24,
+              secure: true,
+            });
+          }
+
+          const decodedToken: DecodedToken = jwtDecode(token);
+          navigateToRole(decodedToken.role);
+        } else {
+          toast.error("Token not found");
+        }
+      } else {
+        toast.error(result.error || "Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Error logging in", error);
+      toast.error("Error logging in");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true);
     login(username, password, authWith);
-    setLoading(false);
   };
+
+  const navigateToRole = (role: string) => {
+    switch (role) {
+      case "USER":
+        router.push("/user");
+        break;
+      case "HEAD":
+        router.push("/head");
+        break;
+      case "ADMIN":
+        router.push("/admin");
+        break;
+      default:
+        console.error("Invalid role");
+        router.push("/auth/login");
+    }
+  };
+
   return (
     <div className="lg:flex bg-white">
       <ToastContainer />
-      {/* Bagian kiri untuk form login */}
       <div className="lg:w-1/2 xl:max-w-screen-sm">
         <div className="py-12 bg-white lg:bg-white flex justify-center lg:justify-start lg:px-12">
           <div className="cursor-pointer flex items-center">
@@ -88,9 +159,9 @@ export default function Login() {
 
               <div className="mt-10">
                 {loading ? (
-                  <div className="flex justify-center items-center">
+                  <div className="bg-indigo-500 text-gray-100 p-4 w-full rounded-full tracking-wide font-semibold font-display focus:outline-none focus:shadow-outline hover:bg-indigo-600 shadow-lg flex justify-center items-center">
                     <svg
-                      className="animate-spin h-7 w-7 text-purple-500"
+                      className="animate-spin h-7 w-7 text-purple-100"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"

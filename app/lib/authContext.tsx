@@ -7,18 +7,11 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import Cookies from "js-cookie";
 import { useRouter, usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { toast } from "react-toastify";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (
-    username: string,
-    password: string,
-    authWith: string
-  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -80,58 +73,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (
-    username: string,
-    password: string,
-    authWith: string
-  ) => {
-    try {
-      const response = await fetch(
-        `${authWith === "BCAFWIFI" ? "/api/auth/ldap" : "/api/auth/login"}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        const { data } = result;
-        const { token } = data;
-
-        if (token) {
-          localStorage.setItem("token", token);
-
-          if (authWith === "BCAFWIFI") {
-            Cookies.set("token", token, {
-              expires: 1 / 24,
-              secure: true,
-            });
-          }
-          try {
-            const decodedToken: DecodedToken = jwtDecode(token);
-            setIsAuthenticated(true);
-            navigateToRole(decodedToken.role);
-          } catch (error) {
-            localStorage.removeItem("token");
-            toast.error("Invalid token");
-          }
-        } else {
-          toast.error("Token not found");
-        }
-      } else {
-        toast.error(result.error || "Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Error logging in", error);
-      toast.error("Error logging in");
-    }
-  };
-
   const logout = async () => {
     try {
       // Panggil API logout ke server
@@ -157,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, logout }}>
       {children}
     </AuthContext.Provider>
   );
