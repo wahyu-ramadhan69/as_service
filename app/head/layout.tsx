@@ -1,9 +1,9 @@
 "use client";
 
-import "../../app/globals.css";
+import "../globals.css";
 import { ReactNode } from "react";
-import Navbar from "../../app/components/navbar";
-import { AuthProvider } from "../../app/lib/authContext";
+import Navbar from "../components/navbar";
+import { AuthProvider, useAuth } from "../lib/authContext";
 
 interface RootLayoutProps {
   children: ReactNode;
