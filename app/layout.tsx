@@ -14,12 +14,7 @@ const Layout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="en">
       <head />
-      <body className={isAuthenticated ? "bg-slate-200" : "bg-white"}>
-        <div className="flex h-full w-full flex-col gap-3 px-[2%] py-4 transition-all duration-500 ease-in-out md:px-[5%] 1g:px-[10%]">
-          <Navbar />
-        </div>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 };
