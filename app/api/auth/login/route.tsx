@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log(user);
-
     if (!user || !user.password) {
       return respondWithError("User not found", 404);
     }

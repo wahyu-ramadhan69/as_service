@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
 
     const authData = await apiResponse.json();
     const { ErrorDescription } = authData.AuthenticateUserRs.ResponseHeader;
-    console.log(ErrorDescription);
     if (ErrorDescription !== "Success") {
       return new NextResponse(
         JSON.stringify({
