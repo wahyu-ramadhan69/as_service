@@ -210,6 +210,15 @@ export async function PUT(
             },
           });
 
+          const user = await prisma.user.findUnique({
+            where: {
+              username: username,
+            },
+            include: {
+              divisi: true,
+            },
+          });
+
           const NamaAplikasi = nama_aplikasi.replace(/\s+/g, "-");
 
           const data = {
@@ -218,7 +227,7 @@ export async function PUT(
             target: `${selectedNode}`,
             full: 1,
             pool: divisi,
-            storage: "G350",
+            storage: `${user?.divisi.nama_storage}`,
           };
 
           const clone = await axios.post(
@@ -439,6 +448,15 @@ export async function PUT(
             data: { nama_server: nama_baru, status: "NOT_AVAILABLE" },
           });
 
+          const user = await prisma.user.findUnique({
+            where: {
+              username: username,
+            },
+            include: {
+              divisi: true,
+            },
+          });
+
           await prisma.server.create({
             data: {
               vmid: newid,
@@ -462,7 +480,7 @@ export async function PUT(
             target: `${selectedNode}`,
             full: 1,
             pool: divisi,
-            storage: "G350",
+            storage: `${user?.divisi.nama_storage}`,
           };
 
           const clone = await axios.post(
