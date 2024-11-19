@@ -221,6 +221,8 @@ export async function PUT(
 
           const NamaAplikasi = nama_aplikasi.replace(/\s+/g, "-");
 
+          console.log(user?.divisi.nama_storage);
+
           const data = {
             newid,
             name: `${NamaAplikasi}`,
