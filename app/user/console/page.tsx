@@ -21,11 +21,6 @@ export default function ConsolePage() {
       const data = await res.json();
       setPort(data.port);
       setPassword(data.password);
-      console.log(
-        `http://192.168.1.237:${port}/vnc.html?password=${encodeURIComponent(
-          data.password
-        )}&autoconnect=true&resize=scale`
-      );
     } catch (err) {
       console.error("Error:", err);
     }

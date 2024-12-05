@@ -58,7 +58,6 @@ export async function POST(req: NextRequest) {
         divisi: divisi,
       },
     });
-
     return NextResponse.json({ port, password }, { status: 200 });
   } catch (error) {
     console.error("Failed to connect to Proxmox:", error);

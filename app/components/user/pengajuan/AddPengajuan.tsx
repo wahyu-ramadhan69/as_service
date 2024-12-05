@@ -58,6 +58,7 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const handleSearch = async () => {
     setLoadingSearch(true);
@@ -130,6 +131,26 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
     >
   ) => {
     const { name, value } = e.target;
+
+    if (name === "nama_aplikasi") {
+      // Validasi untuk nama server hanya huruf, angka, dan "-"
+      const regex = /^[a-zA-Z0-9-]*$/;
+      if (!regex.test(value)) {
+        setFieldErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "Nama server hanya boleh berisi huruf, angka, dan karakter -",
+        }));
+        return;
+      } else {
+        // Hapus error jika valid
+        setFieldErrors((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+
     const updatedValue =
       name === "cpu" || name === "ram" || name === "id_template"
         ? Number(value)
@@ -438,6 +459,11 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                         className="shadow appearance-none border rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required
                       />
+                      {fieldErrors.nama_aplikasi && (
+                        <p className="text-red-500 text-xs italic mt-2">
+                          {fieldErrors.nama_aplikasi}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -542,6 +568,11 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                         readOnly
                         required
                       />
+                      {fieldErrors.nama_aplikasi && (
+                        <p className="text-red-500 text-xs italic mt-2">
+                          {fieldErrors.nama_aplikasi}
+                        </p>
+                      )}
                     </div>
 
                     <div className="mb-2">
@@ -638,6 +669,11 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                       className="shadow appearance-none border rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       required
                     />
+                    {fieldErrors.nama_aplikasi && (
+                      <p className="text-red-500 text-xs italic mt-2">
+                        {fieldErrors.nama_aplikasi}
+                      </p>
+                    )}
                   </div>
                   <div className="mb-4">
                     <label
@@ -740,6 +776,11 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                         required
                         readOnly
                       />
+                      {fieldErrors.nama_aplikasi && (
+                        <p className="text-red-500 text-xs italic mt-2">
+                          {fieldErrors.nama_aplikasi}
+                        </p>
+                      )}
                     </div>
 
                     <div className="mb-2">
@@ -941,6 +982,11 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                         required
                         readOnly
                       />
+                      {fieldErrors.nama_aplikasi && (
+                        <p className="text-red-500 text-xs italic mt-2">
+                          {fieldErrors.nama_aplikasi}
+                        </p>
+                      )}
                     </div>
 
                     <div className="mb-2">
