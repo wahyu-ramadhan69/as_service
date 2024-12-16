@@ -199,9 +199,20 @@ export async function PUT(
             newid++;
           }
 
-          const pengaju = await prisma.user.findUnique({
+          const server = await prisma.server.create({
+            data: {
+              vmid: newid,
+              id_template: Number(pengajuan.id_template),
+              id_ip: ipAddress.id,
+              segment: segment,
+              user: pengajuan.user,
+              divisi: pengajuan.divisi,
+            },
+          });
+
+          const user = await prisma.user.findUnique({
             where: {
-              username: pengajuan.user,
+              username: username,
             },
             include: {
               divisi: true,
@@ -215,8 +226,8 @@ export async function PUT(
             name: `${NamaAplikasi}`,
             target: `${selectedNode}`,
             full: 1,
-            pool: pengaju?.divisi,
-            storage: `${pengaju?.divisi.nama_storage}`,
+            pool: divisi,
+            storage: `${user?.divisi.nama_storage}`,
           };
 
           const clone = await axios.post(
@@ -446,15 +457,6 @@ export async function PUT(
             },
           });
 
-          const pengaju = await prisma.user.findUnique({
-            where: {
-              username: pengajuan.user,
-            },
-            include: {
-              divisi: true,
-            },
-          });
-
           await prisma.server.create({
             data: {
               vmid: newid,
@@ -477,8 +479,8 @@ export async function PUT(
             name: `${NamaAplikasi}`,
             target: `${selectedNode}`,
             full: 1,
-            pool: pengaju?.divisi,
-            storage: `${pengaju?.divisi.nama_storage}`,
+            pool: divisi,
+            storage: `${user?.divisi.nama_storage}`,
           };
 
           const clone = await axios.post(
@@ -714,14 +716,7 @@ export async function PUT(
 
       await axios.delete(
         `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}`,
-        {
-          params: {
-            purge: 1,
-            "destroy-unreferenced-disks": 1,
-          },
-          headers,
-          httpsAgent,
-        }
+        { headers, httpsAgent }
       );
 
       const server = await prisma.server.findUnique({
