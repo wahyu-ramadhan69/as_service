@@ -12,7 +12,6 @@ export async function PUT(
   try {
     const { id } = params;
     const { cpu, storage, ram, nama_storage, head } = await req.json();
-    console.log(head);
 
     if (/\s/.test(nama_storage)) {
       return NextResponse.json(
