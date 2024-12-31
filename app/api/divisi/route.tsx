@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { nama, cpu, storage, ram, nama_storage } = await req.json();
+  const { nama, cpu, storage, ram, nama_storage, head } = await req.json();
 
   // Validate that 'nama' does not contain spaces
   if (/\s/.test(nama)) {
@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
         storage,
         ram,
         nama_storage,
+        head,
       },
     });
     await axios.post(

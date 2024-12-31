@@ -19,6 +19,7 @@ interface Divisi {
   storage: number;
   ram: number;
   nama_storage: string;
+  head: string;
 }
 
 interface Storage {
@@ -37,6 +38,7 @@ const AddDivisiModal: React.FC<AddDivisiModalProps> = ({
   const [storage, setStorage] = useState("");
   const [ram, setRam] = useState("");
   const [namaStorage, setNamaStorage] = useState("");
+  const [head, setHead] = useState("");
 
   useEffect(() => {
     if (divisi) {
@@ -45,12 +47,14 @@ const AddDivisiModal: React.FC<AddDivisiModalProps> = ({
       setStorage(divisi.storage.toString());
       setRam(divisi.ram.toString());
       setNamaStorage(divisi.nama_storage);
+      setHead(divisi.head);
     } else {
       setNama("");
       setCpu("");
       setStorage("");
       setRam("");
       setNamaStorage("");
+      setHead("");
     }
   }, [divisi]);
 
@@ -77,6 +81,7 @@ const AddDivisiModal: React.FC<AddDivisiModalProps> = ({
             storage: Number(storage),
             ram: Number(ram),
             nama_storage: namaStorage,
+            head,
           }),
         }
       );
@@ -88,6 +93,7 @@ const AddDivisiModal: React.FC<AddDivisiModalProps> = ({
         setStorage("");
         setRam("");
         setNamaStorage("");
+        setHead("");
         toast.success(result.message);
 
         onSave(result.data);
@@ -250,6 +256,23 @@ const AddDivisiModal: React.FC<AddDivisiModalProps> = ({
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="storage"
+                  >
+                    Head
+                  </label>
+                  <input
+                    id="head"
+                    type="text"
+                    value={head}
+                    onChange={(e) => setHead(e.target.value)}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">

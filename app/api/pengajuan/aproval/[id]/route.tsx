@@ -226,7 +226,7 @@ export async function PUT(
             name: `${NamaAplikasi}`,
             target: `${selectedNode}`,
             full: 1,
-            pool: divisi,
+            pool: pengajuan.divisi,
             storage: `${user?.divisi.nama_storage}`,
           };
 
@@ -479,7 +479,7 @@ export async function PUT(
             name: `${NamaAplikasi}`,
             target: `${selectedNode}`,
             full: 1,
-            pool: divisi,
+            pool: pengajuan.divisi,
             storage: `${user?.divisi.nama_storage}`,
           };
 

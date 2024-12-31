@@ -56,7 +56,7 @@ const ProjectUI = () => {
   const [isConsoleModal, setIsConsoleModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchProjects();

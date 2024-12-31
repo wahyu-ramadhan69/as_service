@@ -25,6 +25,7 @@ model Divisi {
   storage      Int
   ram          Int
   nama_storage String?
+  head         String?
   users        User[]
 }
 

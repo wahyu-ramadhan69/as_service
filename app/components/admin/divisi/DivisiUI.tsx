@@ -15,6 +15,7 @@ interface Divisi {
   storage: number;
   ram: number;
   nama_storage: string;
+  head: string;
 }
 interface Storage {
   storage: string;
@@ -154,6 +155,9 @@ const DivisiUi: React.FC = () => {
                   Nama Storage
                 </th>
                 <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                  Head
+                </th>
+                <th className="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -176,6 +180,9 @@ const DivisiUi: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 border-b border-gray-200 text-sm">
                     {d.nama_storage}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200 text-sm">
+                    {d.head}
                   </td>
                   <td className="px-6 py-4 border-b border-gray-200 text-sm">
                     <span
