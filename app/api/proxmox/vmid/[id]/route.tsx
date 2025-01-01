@@ -1,6 +1,14 @@
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import https from "https";
+
+const JWT_SECRET = process.env.JWT_SECRET || "rahasia";
+
+interface MyJwtPayload extends JwtPayload {
+  userId: number;
+  role: string;
+}
 
 export async function GET(
   request: NextRequest,
@@ -18,7 +26,39 @@ export async function GET(
   };
 
   try {
-    // Fetch nodes list
+    const token = extractTokenFromCookies(request);
+
+    if (!token) {
+      return respondWithError("Authorization token is missing", 401);
+    }
+
+    const decodedToken = verifyToken(token);
+
+    if (!decodedToken) {
+      return respondWithError("Invalid or expired token", 401);
+    }
+
+    const { divisi } = decodedToken;
+
+    const poolResponse = await axios.get(
+      `${process.env.PROXMOX_API_URL}/pools/${divisi}`,
+      {
+        headers,
+        httpsAgent,
+      }
+    );
+
+    const poolData = poolResponse.data.data;
+
+    const vmInPool = poolData.members.find((member: any) => member.vmid == id);
+
+    if (!vmInPool) {
+      return respondWithError(
+        `VM dengan ${id} tidak ditmukan di ${divisi}`,
+        404
+      );
+    }
+
     const nodesResponse = await axios.get(
       `${process.env.PROXMOX_API_URL}/nodes`,
       {
@@ -58,7 +98,7 @@ export async function GET(
       }
     );
 
-    const config = await axios.get(
+    await axios.get(
       `${process.env.PROXMOX_API_URL}/nodes/${targetNode}/qemu/${id}/config`,
       {
         headers,
@@ -94,4 +134,24 @@ function respondWithError(message: string, status: number) {
 
 function respondWithSuccess(message: string, status: number) {
   return NextResponse.json({ message }, { status });
+}
+
+function extractTokenFromCookies(req: Request): string | undefined {
+  const cookieHeader = req.headers.get("cookie");
+  if (!cookieHeader) return;
+
+  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+  return cookies?.token;
+}
+
+function verifyToken(token: string): MyJwtPayload | null {
+  try {
+    return jwt.verify(token, JWT_SECRET) as MyJwtPayload;
+  } catch {
+    return null;
+  }
 }
