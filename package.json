@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env PORT=80 next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
-    "start": "cross-env PORT=80 next start",
+    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
