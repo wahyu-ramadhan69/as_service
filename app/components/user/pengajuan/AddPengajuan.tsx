@@ -367,6 +367,7 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                         <option value={10}>10 Cores</option>
                         <option value={12}>12 Cores</option>
                         <option value={16}>16 Cores</option>
+                        <option value={24}>24 Cores</option>
                         <option value={32}>32 Cores</option>
                         <option value={64}>64 Cores</option>
                       </select>
@@ -390,10 +391,15 @@ const AddPengajuanModal: React.FC<AddPengajuanModalProps> = ({
                       >
                         <option value={2048}>2 GB</option>
                         <option value={4096}>4 GB</option>
+                        <option value={6144}>6 GB</option>
                         <option value={8192}>8 GB</option>
+                        <option value={10240}>10 GB</option>
+                        <option value={12288}>12 GB</option>
                         <option value={16384}>16 GB</option>
                         <option value={24576}>24 GB</option>
                         <option value={32768}>32 GB</option>
+                        <option value={65536}>64 GB</option>
+                        <option value={131072}>128 GB</option>
                       </select>
                     </div>
 
