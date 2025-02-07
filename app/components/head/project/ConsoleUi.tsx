@@ -1,9 +1,6 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { GoScreenFull } from "react-icons/go";
-import { GrPowerShutdown } from "react-icons/gr";
 import { IoIosClose } from "react-icons/io";
-import { VscDebugRestart, VscDebugStart } from "react-icons/vsc";
 
 interface Member {
   name: string;
@@ -28,27 +25,47 @@ const ConsoleModal: React.FC<ConsoleModalProps> = ({
   onClose,
   data,
 }) => {
-  const [port, setPort] = useState(null);
-  const [password, setPassword] = useState(null);
+  const [port, setPort] = useState<number | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   if (!isOpen) return null;
 
-  const goFullScreen = () => {
-    const iframe = document.getElementById(
-      "console-iframe"
-    ) as HTMLIFrameElement | null;
+  const openInNewTab = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/proxmox/console`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          node: data?.node,
+          vmid: data?.vmid,
+        }),
+      });
 
-    if (iframe) {
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
+      const response = await res.json();
+      if (response.port && response.password) {
+        const url = `https://192.168.1.132:${
+          response.port
+        }/vnc.html?password=${encodeURIComponent(
+          response.password
+        )}&autoconnect=true&resize=scale`;
+        window.open(url, "_blank", "noopener,noreferrer");
       } else {
-        console.error("Fullscreen API is not supported");
+        alert("Failed to retrieve console details for new tab.");
       }
-    } else {
-      console.error("Iframe element not found");
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Error connecting to console.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleConnect = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/proxmox/console`, {
         method: "POST",
@@ -62,10 +79,18 @@ const ConsoleModal: React.FC<ConsoleModalProps> = ({
       });
 
       const response = await res.json();
-      setPort(response.port);
-      setPassword(response.password);
+
+      if (response.port && response.password) {
+        setPort(response.port);
+        setPassword(response.password);
+      } else {
+        alert("Failed to retrieve console details.");
+      }
     } catch (err) {
       console.error("Error:", err);
+      alert("Error connecting to console.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,43 +116,42 @@ const ConsoleModal: React.FC<ConsoleModalProps> = ({
               <h3 className="text-lg leading-6 font-medium text-gray-900">
                 {data?.name} {data?.ip}
               </h3>
-              <div className="flex justify-center items-center">
-                <button
-                  onClick={goFullScreen}
-                  className="flex justify-center items-center text-gray-400 hover:text-gray-600 focus:outline-none bg-green-400 p-1 rounded-full mr-1"
-                >
-                  <GoScreenFull className="text-gray-600 text-sm" />
-                </button>
-                <button
-                  onClick={onClose}
-                  className=" flex justify-center items-center text-gray-400 hover:text-gray-600 focus:outline-none p-1 bg-red-400 rounded-full"
-                >
-                  <IoIosClose className="text-gray-600 text-sm" />
-                </button>
-              </div>
+              <button
+                onClick={onClose}
+                className=" flex justify-center items-center text-gray-400 hover:text-gray-600 focus:outline-none p-1 bg-red-400 rounded-full"
+              >
+                <IoIosClose className="text-gray-600 text-sm" />
+              </button>
             </div>
 
-            <div className="flex justify-center items-center">
-              {port && password ? (
-                <div className="w-full max-w-7xl mt-4">
-                  <iframe
-                    id="console-iframe"
-                    src={`http://192.168.1.132:${port}/vnc.html?password=${encodeURIComponent(
-                      password
-                    )}&autoconnect=true&resize=scale`}
-                    width="100%"
-                    height="700px"
-                    className="border border-gray-300 rounded"
-                    title="VM Console"
-                  ></iframe>
-                </div>
+            <div className="flex flex-col justify-center items-center mt-4">
+              {loading ? (
+                <p>Loading...</p>
+              ) : port && password ? (
+                <iframe
+                  src={`https://192.168.1.132:${port}/vnc.html?password=${encodeURIComponent(
+                    password
+                  )}&autoconnect=true&resize=scale`}
+                  width="100%"
+                  height="700px"
+                  className="border border-gray-300 rounded"
+                  title="VM Console"
+                ></iframe>
               ) : (
-                <button
-                  className="bg-sky-400 px-4 py-2 text-white rounded-lg"
-                  onClick={handleConnect}
-                >
-                  Open Console
-                </button>
+                <div className="flex space-x-4">
+                  <button
+                    className="bg-sky-400 px-4 py-2 text-white rounded-lg"
+                    onClick={handleConnect}
+                  >
+                    Open Console
+                  </button>
+                  <button
+                    className="bg-blue-500 px-4 py-2 text-white rounded-lg"
+                    onClick={openInNewTab}
+                  >
+                    Open in New Tab
+                  </button>
+                </div>
               )}
             </div>
           </div>
