@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const token = extractTokenFromCookies(req);
@@ -35,7 +35,7 @@ export async function PUT(
     if (role !== "HEAD") {
       return respondWithError(
         "You do not have access to perform this action",
-        403
+        403,
       );
     }
 
@@ -64,7 +64,7 @@ export async function PUT(
     if (!pengajuan) {
       return respondWithError(
         "Pengajuan dengan id tersebut tidak ditemukan",
-        404
+        404,
       );
     }
 
@@ -110,7 +110,7 @@ export async function PUT(
       if (!ipAddress) {
         return respondWithError(
           `No available IP address found for segment ${pengajuan.segment}`,
-          404
+          404,
         );
       }
 
@@ -123,7 +123,7 @@ export async function PUT(
       if (!template) {
         return respondWithError(
           `No available template found for id ${pengajuan.id_template}`,
-          404
+          404,
         );
       }
 
@@ -147,7 +147,7 @@ export async function PUT(
         {
           headers,
           httpsAgent,
-        }
+        },
       );
 
       const nodes = nodesResponse.data.data;
@@ -161,7 +161,7 @@ export async function PUT(
           {
             headers,
             httpsAgent,
-          }
+          },
         );
 
         const nodeStatus = nodeStatusResponse.data.data;
@@ -187,7 +187,7 @@ export async function PUT(
             {
               headers,
               httpsAgent,
-            }
+            },
           );
 
           const vmList = vmListResponse.data.data;
@@ -197,6 +197,22 @@ export async function PUT(
 
           while (usedIds.includes(newid)) {
             newid++;
+          }
+
+          let isAvailableInDb = false;
+          while (!isAvailableInDb) {
+            const existingServer = await prisma.server.findUnique({
+              where: { vmid: newid },
+            });
+
+            if (!existingServer) {
+              isAvailableInDb = true;
+            } else {
+              newid++;
+              while (usedIds.includes(newid)) {
+                newid++;
+              }
+            }
           }
 
           const server = await prisma.server.create({
@@ -233,7 +249,7 @@ export async function PUT(
           const clone = await axios.post(
             `${process.env.PROXMOX_API_URL}/nodes/${template.nodes}/qemu/${template.vmid}/clone`,
             data,
-            { headers, httpsAgent }
+            { headers, httpsAgent },
           );
 
           let taskFinished = false;
@@ -246,7 +262,7 @@ export async function PUT(
               {
                 headers,
                 httpsAgent,
-              }
+              },
             );
             if (statusResponse.data.data.status === "stopped") {
               taskFinished = true;
@@ -262,7 +278,7 @@ export async function PUT(
               cores: Number(pengajuan.cpu),
               net0: `virtio,bridge=${bridge}`,
             },
-            { headers, httpsAgent }
+            { headers, httpsAgent },
           );
 
           const resize = await axios.put(
@@ -271,13 +287,13 @@ export async function PUT(
               disk: "scsi0",
               size: `+${storage - 40}G`,
             },
-            { headers, httpsAgent }
+            { headers, httpsAgent },
           );
 
           const startVm = await axios.post(
             `${process.env.PROXMOX_API_URL}/nodes/${selectedNode}/qemu/${newid}/status/start`,
             {},
-            { headers, httpsAgent }
+            { headers, httpsAgent },
           );
 
           await prisma.pengajuan.update({
@@ -313,7 +329,7 @@ export async function PUT(
           message: "Server is being created it will take 10 to 15 minutes",
           data: response,
         },
-        { status: 200 }
+        { status: 200 },
       );
     } else if (jenis_pengajuan === "Existing") {
       const taskOngoig = await prisma.pengajuan.findFirst({
@@ -328,7 +344,7 @@ export async function PUT(
       if (taskOngoig) {
         return respondWithError(
           `VM with ID ${pengajuan.vmid_old} is currently being cloned or has another ongoing task.`,
-          400
+          400,
         );
       }
 
@@ -372,7 +388,7 @@ export async function PUT(
       if (!ipAddress) {
         return respondWithError(
           `No available IP address found for segment ${pengajuan.segment}`,
-          400
+          400,
         );
       }
 
@@ -391,7 +407,7 @@ export async function PUT(
         {
           headers,
           httpsAgent,
-        }
+        },
       );
 
       const nodes = nodesResponse.data.data;
@@ -405,7 +421,7 @@ export async function PUT(
           {
             headers,
             httpsAgent,
-          }
+          },
         );
 
         const nodeStatus = nodeStatusResponse.data.data;
@@ -431,7 +447,7 @@ export async function PUT(
             {
               headers,
               httpsAgent,
-            }
+            },
           );
 
           const vmList = vmListResponse.data.data;
@@ -441,6 +457,22 @@ export async function PUT(
 
           while (usedIds.includes(newid)) {
             newid++;
+          }
+
+          let isAvailableInDb = false;
+          while (!isAvailableInDb) {
+            const existingServer = await prisma.server.findUnique({
+              where: { vmid: newid },
+            });
+
+            if (!existingServer) {
+              isAvailableInDb = true;
+            } else {
+              newid++;
+              while (usedIds.includes(newid)) {
+                newid++;
+              }
+            }
           }
 
           await prisma.ipAddress.update({
@@ -486,7 +518,7 @@ export async function PUT(
           const clone = await axios.post(
             `${process.env.PROXMOX_API_URL}/nodes/${nodeVM}/qemu/${vmid_old}/clone`,
             data,
-            { headers, httpsAgent }
+            { headers, httpsAgent },
           );
 
           const upid = clone.data.data;
@@ -501,7 +533,7 @@ export async function PUT(
               {
                 headers,
                 httpsAgent,
-              }
+              },
             );
             if (statusResponse.data.data.status === "stopped") {
               taskFinished = true;
@@ -513,7 +545,7 @@ export async function PUT(
           await axios.post(
             `${process.env.PROXMOX_API_URL}/nodes/${selectedNode}/qemu/${newid}/status/start`,
             {},
-            { headers, httpsAgent }
+            { headers, httpsAgent },
           );
 
           await prisma.pengajuan.update({
@@ -548,7 +580,7 @@ export async function PUT(
           message: "Server is being created it will take 10 to 15 minutes.",
           data: response,
         },
-        { status: 200 }
+        { status: 200 },
       );
     } else if (jenis_pengajuan === "Perubahan") {
       try {
@@ -561,7 +593,7 @@ export async function PUT(
         if (!server) {
           return respondWithError(
             `Server dengan id${vmid} tidak ditemukan`,
-            400
+            400,
           );
         }
 
@@ -598,7 +630,7 @@ export async function PUT(
           if (!ipAddress) {
             return respondWithError(
               `No available IP address found for segment ${segment}`,
-              400
+              400,
             );
           }
 
@@ -630,7 +662,7 @@ export async function PUT(
           {
             headers,
             httpsAgent,
-          }
+          },
         );
 
         const vmStorage = vmResponse.data.data.maxdisk / (1024 * 1024 * 1024);
@@ -652,7 +684,7 @@ export async function PUT(
         await axios.put(
           `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}/config`,
           configPayload,
-          { headers, httpsAgent }
+          { headers, httpsAgent },
         );
 
         await axios.put(
@@ -661,7 +693,7 @@ export async function PUT(
             disk: "scsi0",
             size: `+${fixStorage}G`,
           },
-          { headers, httpsAgent }
+          { headers, httpsAgent },
         );
 
         const response = await prisma.pengajuan.update({
@@ -673,7 +705,7 @@ export async function PUT(
 
         return NextResponse.json(
           { message: "Server successfully configured.", data: response },
-          { status: 200 }
+          { status: 200 },
         );
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -697,13 +729,13 @@ export async function PUT(
     } else if (jenis_pengajuan === "Delete") {
       const statusVM = await axios.get(
         `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}/status/current`,
-        { headers, httpsAgent }
+        { headers, httpsAgent },
       );
 
       if (statusVM.data.data.status === "running") {
         return respondWithError(
           `Shutdown VM ${pengajuan.vmid} untuk menghapus server`,
-          400
+          400,
         );
       }
 
@@ -716,7 +748,7 @@ export async function PUT(
 
       await axios.delete(
         `${process.env.PROXMOX_API_URL}/nodes/${pengajuan.nodes}/qemu/${pengajuan.vmid}`,
-        { headers, httpsAgent }
+        { headers, httpsAgent },
       );
 
       const server = await prisma.server.findUnique({
@@ -728,7 +760,7 @@ export async function PUT(
       if (!server) {
         return respondWithError(
           `Server dengan id${pengajuan.vmid} tidak ditemukan`,
-          400
+          400,
         );
       }
 
@@ -752,7 +784,7 @@ export async function PUT(
 
       return NextResponse.json(
         { message: "Server successfully deleted", data: response },
-        { status: 200 }
+        { status: 200 },
       );
     } else {
       return respondWithError(`Pengajuanmu tidak sesuai`, 400);
@@ -766,11 +798,14 @@ function extractTokenFromCookies(req: Request): string | undefined {
   const cookieHeader = req.headers.get("cookie");
   if (!cookieHeader) return;
 
-  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
-    const [name, value] = cookie.trim().split("=");
-    acc[name] = value;
-    return acc;
-  }, {} as Record<string, string>);
+  const cookies = cookieHeader.split(";").reduce(
+    (acc, cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      acc[name] = value;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   return cookies?.token;
 }
